@@ -26,6 +26,11 @@ repositories {
     jcenter()
 }
 
+javadoc {
+    options.encoding = 'UTF-8'
+    options.tags = [ "http.response.details" ]
+}
+
 dependencies {
     //For Generate API
     implementation 'io.swagger:swagger-annotations:1.5.24'
