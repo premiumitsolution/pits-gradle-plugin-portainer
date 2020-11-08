@@ -1,0 +1,99 @@
+plugins {
+    id 'java-gradle-plugin'
+    id "org.openapi.generator" version "5.0.0-beta2"
+    id "io.freefair.lombok" version "5.2.1"
+}
+
+sourceSets.main.java.srcDirs = ['build/generated-sources/main/java','src/main/java']
+
+group 'com.pits.gradle'
+version '1.0-SNAPSHOT'
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType(Test) {
+    systemProperty "file.encoding", "UTF-8"
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    //For Generate API
+    implementation 'io.swagger:swagger-annotations:1.5.24'
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation 'com.squareup.okhttp3:okhttp:3.14.7'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.7'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'io.gsonfire:gson-fire:1.8.4'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task generateContract(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    description = "Generate DTO + Interface for Decision Contract"
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+
+    validateSpec.set(true)
+    generatorName.set("java")
+    inputSpec.set("$rootDir/info/deviantony-Portainer.yaml")
+    outputDir.set("$rootDir/info/generated")
+    apiPackage.set("com.pits.gradle.plugin.data.controller")
+    modelPackage.set("com.pits.gradle.plugin.data.dto")
+    configOptions = [
+            dateLibrary       : "java8",
+            interfaceOnly     : "true",
+            gradleBuildFile   : "false",
+            exceptionHandler  : "false"
+    ]
+}
+
+task updateContract {
+    description = "Update contract information from Swagger Contract"
+    dependsOn("cleanGenerated", "generateContract", "updateDtoAndController")
+    doLast {
+        println("updateContract done")
+    }
+}
+
+task cleanGenerated(type: Delete) {
+    delete("$rootDir/info/generated")
+    delete("$buildDir/generated-sources/main/java/")
+}
+
+task updateDtoAndController(type: Copy) {
+    description = "Update DTO files and controller interface"
+    from("$rootDir/info/generated/src/main/java/")
+    into("$buildDir/generated-sources/main/java/")
+    exclude("**/org")
+    doLast {
+        println("updateDtoAndController done")
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn("updateContract")
+}
+
+gradlePlugin {
+    plugins {
+        pitsPortainerPlugin {
+            id = 'com.pits.gradle.portainer'
+            implementationClass = 'com.pits.gradle.plugin.portainer.PortainerPlugin'
+        }
+    }
+}

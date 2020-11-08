@@ -19,6 +19,9 @@ dist/
 # Package files
 *.jar
 
+.gradle
+build/
+
 # Maven
 target/
 dist/
@@ -48,3 +51,4 @@ Thumbs.db
 *.mov
 *.wmv
 
+/info/generated
