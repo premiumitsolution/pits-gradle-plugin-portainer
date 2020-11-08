@@ -53,7 +53,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     authenticate();
 
     log.info("Determine endpoint");
-    Integer token = determineEndPoint();
+    Integer endPointId = determineEndPoint();
   }
 
   private void init() {
