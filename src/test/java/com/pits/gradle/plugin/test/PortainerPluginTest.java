@@ -17,8 +17,7 @@ public class PortainerPluginTest {
   @Test
   public void deployImageToPortainerTaskTest() {
     Project project = ProjectBuilder.builder().build();
-    project.getPluginManager().apply("com.pits.gradle.portainer");
-
+    project.getPluginManager().apply("com.pits.gradle.plugin.portainer");
     assertTrue(project.getTasks().getByName("deployImageToPortainer") instanceof DeployImageToPortainerTask);
   }
 

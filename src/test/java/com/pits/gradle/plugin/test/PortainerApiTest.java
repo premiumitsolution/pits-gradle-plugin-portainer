@@ -4,9 +4,11 @@ import com.pits.gradle.plugin.data.ApiClient;
 import com.pits.gradle.plugin.data.ApiException;
 import com.pits.gradle.plugin.data.controller.AuthApi;
 import com.pits.gradle.plugin.data.controller.ContainerApi;
+import com.pits.gradle.plugin.data.controller.EndpointsApi;
 import com.pits.gradle.plugin.data.dto.AuthenticateUserRequest;
 import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.dto.ContainerSummary;
+import com.pits.gradle.plugin.data.dto.EndpointSubset;
 import java.util.List;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -22,14 +24,11 @@ import org.junit.jupiter.api.Test;
 public class PortainerApiTest {
 
   @Test
-  public void testAuth() throws ApiException {
+  public void testApi() throws ApiException {
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
     loggingInterceptor.setLevel(Level.BODY);
-
-
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     builder.addInterceptor(loggingInterceptor);
-
 
     ApiClient apiClient = new ApiClient(builder.build());
     apiClient.setBasePath("https://port.premiumitsolution.com/api");
@@ -41,18 +40,25 @@ public class PortainerApiTest {
     Asserts.notEmpty(response.getJwt(), "Jwt");
     System.out.println(response.getJwt());
 
-    apiClient.addDefaultHeader("Authorization", "Bearer "+response.getJwt());
+    apiClient.addDefaultHeader("Authorization", "Bearer " + response.getJwt());
 
     ContainerApi containerApi = new ContainerApi(apiClient);
     List<ContainerSummary> containerSummaryList = containerApi.endpointContainerList(8, true, null, null, null);
-    if (containerSummaryList!=null){
+    if (containerSummaryList != null) {
       containerSummaryList.forEach(containerSummary -> {
         System.out.println(containerSummary.toString());
       });
       System.out.println("Container size:" + containerSummaryList.size());
     }
 
-    //endpointsApi.
+    EndpointsApi endpointsApi = new EndpointsApi(apiClient);
+    List<EndpointSubset> endpointList = endpointsApi.endpointList();
+    if (endpointList != null) {
+      endpointList.forEach(endpointSubset -> {
+        System.out.println(endpointSubset.toString());
+      });
+      System.out.println("EndPoints size:" + endpointList.size());
+    }
 
 
   }

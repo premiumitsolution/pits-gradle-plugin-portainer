@@ -9,11 +9,13 @@ import org.gradle.api.provider.Property;
  */
  public abstract class PortainerSetting {
 
-  abstract public Property<String> getPortainerUrl();
+  abstract public Property<String> getPortainerApiUrl();
 
   abstract public Property<String> getPortainerLogin();
 
   abstract public Property<String> getPortainerPassword();
+
+ abstract public Property<String> getPortainerEndPointName();
 
   abstract public Property<String> getDockerImageName();
 

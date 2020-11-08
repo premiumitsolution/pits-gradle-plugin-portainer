@@ -18,8 +18,9 @@ public class PortainerPlugin implements Plugin<Project> {
     project.getTasks().register("deployImageToPortainer", DeployImageToPortainerTask.class, task -> {
       task.getPortainerLogin().set(portainerSetting.getPortainerLogin());
       task.getPortainerPassword().set(portainerSetting.getPortainerPassword());
-      task.getPortainerUrl().set(portainerSetting.getPortainerUrl());
+      task.getPortainerApiUrl().set(portainerSetting.getPortainerApiUrl());
       task.getDockerImageName().set(portainerSetting.getDockerImageName());
+      task.getPortainerEndPointName().set(portainerSetting.getPortainerEndPointName());
     });
   }
 }
