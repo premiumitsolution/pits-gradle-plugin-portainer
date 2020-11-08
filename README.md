@@ -1,8 +1,8 @@
 # Portainer.io gradle plugin
 
 <!---
-[![Build Status](https://github.com/coditory/gradle-integration-test-plugin/workflows/Build/badge.svg?branch=master)](https://github.com/coditory/gradle-integration-test-plugin/actions?query=workflow%3ABuild+branch%3Amaster)
-[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.1.9-green.svg)](https://plugins.gradle.org/plugin/com.coditory.integration-test)
+[//]: [![Build Status](https://github.com/coditory/gradle-integration-test-plugin/workflows/Build/badge.svg?branch=master)](https://github.com/coditory/gradle-integration-test-plugin/actions?query=workflow%3ABuild+branch%3Amaster)
+[//]: [![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.1.9-green.svg)](https://plugins.gradle.org/plugin/com.coditory.integration-test)
 -->
 
 ## Enabling the plugin
