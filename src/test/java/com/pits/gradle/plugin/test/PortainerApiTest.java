@@ -10,6 +10,7 @@ import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.dto.EndpointSubset;
 import java.util.List;
+import java.util.Optional;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
@@ -42,24 +43,23 @@ public class PortainerApiTest {
 
     apiClient.addDefaultHeader("Authorization", "Bearer " + response.getJwt());
 
+    EndpointsApi endpointsApi = new EndpointsApi(apiClient);
+    List<EndpointSubset> endpointList = endpointsApi.endpointList();
+
+    Optional<EndpointSubset> endpointSubsetOptional = endpointList.stream()
+        .filter(endpointSubset -> endpointSubset.getName() != null && endpointSubset.getName().equals("qa")).findFirst();
+
+    EndpointSubset endPoint = endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name: qa"));
+
     ContainerApi containerApi = new ContainerApi(apiClient);
-    List<ContainerSummary> containerSummaryList = containerApi.endpointContainerList(8, true, null, null, null);
+    List<ContainerSummary> containerSummaryList = containerApi.endpointContainerList(endPoint.getId(), true, null, null, null);
+
     if (containerSummaryList != null) {
       containerSummaryList.forEach(containerSummary -> {
-        System.out.println(containerSummary.toString());
+        System.out.println(containerSummary.getNames().get(0));
       });
       System.out.println("Container size:" + containerSummaryList.size());
     }
-
-    EndpointsApi endpointsApi = new EndpointsApi(apiClient);
-    List<EndpointSubset> endpointList = endpointsApi.endpointList();
-    if (endpointList != null) {
-      endpointList.forEach(endpointSubset -> {
-        System.out.println(endpointSubset.toString());
-      });
-      System.out.println("EndPoints size:" + endpointList.size());
-    }
-
 
   }
 

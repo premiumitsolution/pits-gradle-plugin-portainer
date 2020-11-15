@@ -109,7 +109,6 @@ gradlePlugin {
             implementationClass = 'com.pits.gradle.plugin.portainer.PortainerPlugin'
             displayName = 'PremiumItSolution Portainer Plugin'
             description = 'Plugin by PremiumItSolution for work with portainer.io'
-
         }
     }
 }
