@@ -54,6 +54,12 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
     log.info("Determine endpoint");
     Integer endPointId = determineEndPoint();
+
+    log.info("Remove old container");
+    // TODO:
+
+    log.info("Create new container with specified image");
+    // TODO:
   }
 
   private void init() {
