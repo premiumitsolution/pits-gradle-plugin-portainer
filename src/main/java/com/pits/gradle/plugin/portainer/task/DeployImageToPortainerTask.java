@@ -12,6 +12,9 @@ import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -105,8 +108,24 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     log.info("Remove old container");
     removeOldContainer(apiToken, endPointId);
 
+    log.info("Pull image container");
+    pullImage(apiToken, endPointId);
+
     log.info("Create new container with specified image");
     // TODO:
+  }
+
+  private void pullImage(String apiToken, Integer endPointId) throws IOException {
+    String registryAuth = String.format("{\n"
+        + "  \"serveraddress\": \"%s\""
+        + "}", getRegistryUrl());
+    registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
+    Response<Void> createImageResponse = portainerDockerApi
+        .createImage(endPointId, String.format("%s:%s", getDockerImageName(), getDockerImageTag()), registryAuth, apiToken)
+        .execute();
+    if (createImageResponse.code() != 200) {
+      throw new RuntimeException("Error while pull container:" + createImageResponse.message());
+    }
   }
 
   private void init() {

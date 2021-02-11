@@ -110,23 +110,10 @@ public class PortainerApiTest {
     }
 
     //Pull image
-//    String registryAuth = String.format("{\n"
-//        + "  \"username\": \"%s\",\n"
-//        + "  \"password\": \"%s\",\n"
-//        + "  \"serveraddress\": \"%s\"\n"
-//        + "}", registryUser, registryPassword, "registry.premiumitsolution.com");
-
     String registryAuth = String.format("{\n"
         + "  \"serveraddress\": \"%s\""
         + "}", "registry.premiumitsolution.com");
-
-//    String registryAuth = String.format("{\n"
-//        + "  \"username\": \"%s\",\n"
-//        + "  \"password\": \"%s\""
-//        + "}", registryUser, registryPassword);
-
     registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
-
     Response<Void> createImageResponse = portainerDockerApi.createImage(endPoint.getId(), String.format("%s:%s", imageName, imageTag), registryAuth, apiToken)
         .execute();
     if (createImageResponse.code() != 200) {
