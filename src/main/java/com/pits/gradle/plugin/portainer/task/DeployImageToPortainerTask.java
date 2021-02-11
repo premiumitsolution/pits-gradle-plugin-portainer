@@ -1,7 +1,15 @@
 package com.pits.gradle.plugin.portainer.task;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
+import com.pits.gradle.plugin.data.docker.dto.EndpointIPAMConfig;
+import com.pits.gradle.plugin.data.docker.dto.EndpointSettings;
+import com.pits.gradle.plugin.data.docker.dto.HostConfig;
+import com.pits.gradle.plugin.data.docker.dto.NetworkingConfig;
+import com.pits.gradle.plugin.data.docker.dto.PortBinding;
+import com.pits.gradle.plugin.data.docker.dto.RestartPolicy;
+import com.pits.gradle.plugin.data.docker.dto.RestartPolicy.NameEnum;
 import com.pits.gradle.plugin.data.portainer.ApiClient;
 import com.pits.gradle.plugin.data.portainer.ApiException;
 import com.pits.gradle.plugin.data.portainer.controller.AuthApi;
@@ -12,11 +20,17 @@ import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
+import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -29,7 +43,7 @@ import org.gradle.api.tasks.TaskAction;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 /**
@@ -67,10 +81,14 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   @Input
   abstract public Property<String> getRegistryUrl();
 
+  @Input
+  abstract public Property<String> getPublishedPorts();
 
   private void initDockerApi() {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    Gson gson = new GsonBuilder()
+        .setLenient()
+        .setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
+        .create();
 
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
     loggingInterceptor.setLevel(Level.BODY);
@@ -83,7 +101,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
     Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(getPortainerApiUrl().get())
-        .addConverterFactory(JacksonConverterFactory.create(mapper))
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .client(okHttpClient)
         .build();
     portainerDockerApi = retrofit.create(PortainerDockerApi.class);
@@ -112,7 +130,70 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     pullImage(apiToken, endPointId);
 
     log.info("Create new container with specified image");
+    createNewContainer(apiToken, endPointId);
+
+    log.info("Start new container with specified image");
     // TODO:
+
+  }
+
+  private void createNewContainer(String apiToken, Integer endPointId) throws IOException {
+    ContainerCreatePortainerRequest containerConfig = new ContainerCreatePortainerRequest();
+    containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
+    containerConfig.openStdin(false);
+    containerConfig.tty(false);
+
+    String ports = getPublishedPorts().getOrNull();
+    if (ports != null) {
+      String[] portArray = ports.split(",");
+      if (portArray.length > 0) {
+        Map<String, Object> exposedPorts = new HashMap<>();
+        Map<String, List<PortBinding>> hostPortBindings = new HashMap<>();
+
+        HostConfig hostConfig = new HostConfig()
+            .networkMode("bridge")
+            .restartPolicy(new RestartPolicy().name(NameEnum.EMPTY))
+            .publishAllPorts(false)
+            .autoRemove(false)
+            .privileged(false)
+            .init(false);
+
+        Arrays.stream(portArray).map(s -> s.split("/")).forEach(strings -> {
+          String protocol = strings[0].trim();
+          String containerPort = strings[1].trim();
+          String hostPort = strings[2].trim();
+
+          // Add exposed port
+          String exposeValue = String.format("%s/%s", containerPort, protocol);
+          exposedPorts.put(exposeValue, new Object());
+
+          // Add port binding
+          hostPortBindings.put(exposeValue, Collections.singletonList(new PortBinding().hostPort(hostPort)));
+        });
+        hostConfig.portBindings(hostPortBindings);
+        containerConfig.setExposedPorts(exposedPorts);
+        containerConfig.setHostConfig(hostConfig);
+
+        Map<String, EndpointSettings> endpointSettingsMap = new HashMap<>();
+        endpointSettingsMap.put("bridge", new EndpointSettings().ipAMConfig(new EndpointIPAMConfig().ipv4Address("").ipv6Address("")));
+        NetworkingConfig networkingConfig = new NetworkingConfig().endpointsConfig(endpointSettingsMap);
+
+        containerConfig.setNetworkingConfig(networkingConfig);
+      }
+    }
+
+    Call<ContainerCreateResponse> callDeleteContainer = portainerDockerApi.createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
+    Response<ContainerCreateResponse> dockerResponse = callDeleteContainer.execute();
+    if ((dockerResponse.code() == 200) || (dockerResponse.code() == 201)) {
+      ContainerCreateResponse createResponse = dockerResponse.body();
+      StringJoiner sb = new StringJoiner("\n");
+      if (createResponse.getWarnings() != null) {
+        createResponse.getWarnings().forEach(sb::add);
+      }
+      System.out.printf("Created new container with id='%s', warnings='%s'%n", createResponse.getId(), sb);
+    } else {
+      throw new RuntimeException("Error while create container:" + dockerResponse.message());
+    }
   }
 
   private void pullImage(String apiToken, Integer endPointId) throws IOException {

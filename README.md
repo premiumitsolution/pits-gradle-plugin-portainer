@@ -20,10 +20,12 @@ portainerSetting {
     dockerImageName = ''
     dockerImageTag = ''
     registryUrl = ''
+    publishedPorts = ''
 }
 ```
 
 portainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
+publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For exmaple: tcp/8080/80, tcp/8081/88
 
 ## Tasks
 
@@ -33,13 +35,22 @@ Deploy '_dockerImageName_':'_dockerImageTag_' to endpoint with the name '_portai
 
 - Remove container (search by '_containerName_') from the endpoint if it's exists;
 - Pull image '_dockerImageName_':'_dockerImageTag_' from '_dockerImageTag_';
-- Create container inside the endpoint with specified docker image: '_dockerImageName_':'_dockerImageTag_' and container name: '_containerName_';
+- Create container inside the endpoint with specified docker image: '_dockerImageName_':'_dockerImageTag_' and container name: '_containerName_'. If set _
+  publishedPorts_' the port will be published inside containers;
 - Start container with container name: '_containerName_'.
 
 ## Usage
 
-Running plugin:
+To run the plugin execute next command:
+
 ```sh
 # Deploy image to portainer
-./gradlew deployImageToPortainer
+./gradle deployImageToPortainer
 ```
+
+## Test
+
+Testing with portainer.io version:
+
+- 2.0.0
+- 2.1.1

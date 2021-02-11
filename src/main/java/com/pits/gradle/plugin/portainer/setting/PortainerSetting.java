@@ -24,4 +24,8 @@ public abstract class PortainerSetting {
   abstract public Property<String> getContainerName();
 
   abstract public Property<String> getRegistryUrl();
+
+  abstract public Property<String> getPublishedPorts();
+
+
 }

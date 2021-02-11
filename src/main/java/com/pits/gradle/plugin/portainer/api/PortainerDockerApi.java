@@ -1,7 +1,7 @@
 package com.pits.gradle.plugin.portainer.api;
 
-import com.pits.gradle.plugin.data.docker.dto.ContainerConfig;
 import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
+import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -66,7 +66,7 @@ public interface PortainerDockerApi {
    */
   @POST("endpoints/{endpointId}/docker/containers/create")
   Call<ContainerCreateResponse> createContainer(@Path("endpointId") Integer endPointId,
-      @Body ContainerConfig containerConfig,
+      @Body ContainerCreatePortainerRequest containerConfig,
       @Query(value = "name") String name,
       @Header("Authorization") String authHeader);
 
