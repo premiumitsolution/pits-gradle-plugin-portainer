@@ -2,15 +2,15 @@ package com.pits.gradle.plugin.portainer.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.pits.gradle.plugin.data.ApiClient;
-import com.pits.gradle.plugin.data.ApiException;
-import com.pits.gradle.plugin.data.controller.AuthApi;
-import com.pits.gradle.plugin.data.controller.ContainerApi;
-import com.pits.gradle.plugin.data.controller.EndpointsApi;
-import com.pits.gradle.plugin.data.dto.AuthenticateUserRequest;
-import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
-import com.pits.gradle.plugin.data.dto.ContainerSummary;
-import com.pits.gradle.plugin.data.dto.EndpointSubset;
+import com.pits.gradle.plugin.data.portainer.ApiClient;
+import com.pits.gradle.plugin.data.portainer.ApiException;
+import com.pits.gradle.plugin.data.portainer.controller.AuthApi;
+import com.pits.gradle.plugin.data.portainer.controller.ContainerApi;
+import com.pits.gradle.plugin.data.portainer.controller.EndpointsApi;
+import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserRequest;
+import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
+import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
+import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +60,10 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @Input
   abstract public Property<String> getContainerName();
+
+  @Input
+  abstract public Property<String> getRegistryUrl();
+
 
   private void initDockerApi() {
     ObjectMapper mapper = new ObjectMapper();

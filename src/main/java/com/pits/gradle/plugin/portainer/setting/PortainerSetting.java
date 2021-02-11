@@ -22,4 +22,6 @@ public abstract class PortainerSetting {
   abstract public Property<String> getDockerImageTag();
 
   abstract public Property<String> getContainerName();
+
+  abstract public Property<String> getRegistryUrl();
 }

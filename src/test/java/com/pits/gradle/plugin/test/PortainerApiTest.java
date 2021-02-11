@@ -2,16 +2,18 @@ package com.pits.gradle.plugin.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.pits.gradle.plugin.data.ApiClient;
-import com.pits.gradle.plugin.data.ApiException;
-import com.pits.gradle.plugin.data.controller.AuthApi;
-import com.pits.gradle.plugin.data.controller.ContainerApi;
-import com.pits.gradle.plugin.data.controller.EndpointsApi;
-import com.pits.gradle.plugin.data.dto.AuthenticateUserRequest;
-import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
-import com.pits.gradle.plugin.data.dto.ContainerSummary;
-import com.pits.gradle.plugin.data.dto.EndpointSubset;
+import com.pits.gradle.plugin.data.portainer.ApiClient;
+import com.pits.gradle.plugin.data.portainer.ApiException;
+import com.pits.gradle.plugin.data.portainer.controller.AuthApi;
+import com.pits.gradle.plugin.data.portainer.controller.ContainerApi;
+import com.pits.gradle.plugin.data.portainer.controller.EndpointsApi;
+import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserRequest;
+import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
+import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
+import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +57,8 @@ public class PortainerApiTest {
 
   @Test
   public void testApi() throws Exception {
+    String imageName = "registry.premiumitsolution.com/erp/pits-erp-project";
+    String imageTag = "1.1.6.24";
     String containerName = "pits-erp-project";
 
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -89,6 +93,8 @@ public class PortainerApiTest {
     List<ContainerSummary> foundedContainers = containerApi.endpointContainerList(endPoint.getId(), true, null, null, fillerByName);
 
     PortainerDockerApi portainerDockerApi = initDockerApi();
+
+    // Delete container
     if ((foundedContainers != null) && (foundedContainers.size() > 0)) {
       for (ContainerSummary containerSummary : foundedContainers) {
         System.out.printf("Remove container with id='%s', name='%s' and image='%s'%n", containerSummary.getId(), containerSummary.getNames(),
@@ -102,6 +108,47 @@ public class PortainerApiTest {
     } else {
       System.out.println("There is not containers for remove");
     }
+
+    //Pull image
+//    String registryAuth = String.format("{\n"
+//        + "  \"username\": \"%s\",\n"
+//        + "  \"password\": \"%s\",\n"
+//        + "  \"serveraddress\": \"%s\"\n"
+//        + "}", registryUser, registryPassword, "registry.premiumitsolution.com");
+
+    String registryAuth = String.format("{\n"
+        + "  \"serveraddress\": \"%s\""
+        + "}", "registry.premiumitsolution.com");
+
+//    String registryAuth = String.format("{\n"
+//        + "  \"username\": \"%s\",\n"
+//        + "  \"password\": \"%s\""
+//        + "}", registryUser, registryPassword);
+
+    registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
+
+    Response<Void> createImageResponse = portainerDockerApi.createImage(endPoint.getId(), String.format("%s:%s", imageName, imageTag), registryAuth, apiToken)
+        .execute();
+    if (createImageResponse.code() != 200) {
+      throw new RuntimeException("Error while pull container:" + createImageResponse.message());
+    }
+
+    // Create container
+//    ContainerConfig containerConfig = new ContainerConfig();
+//    containerConfig.image(String.format("%s:%s", imageName, imageTag));
+//    Call<ContainerCreateResponse> callDeleteContainer = portainerDockerApi.createContainer(endPoint.getId(), containerConfig, containerName, apiToken);
+//    Response<ContainerCreateResponse> dockerResponse = callDeleteContainer.execute();
+//    if (dockerResponse.code() == 201) {
+//      ContainerCreateResponse createResponse = dockerResponse.body();
+//      StringJoiner sb = new StringJoiner("\n");
+//      if (createResponse.getWarnings() != null) {
+//        createResponse.getWarnings().forEach(sb::add);
+//      }
+//      System.out.printf("Created new container with id='%s', warnings='%s'%n", createResponse.getId(), sb);
+//    } else {
+//      throw new RuntimeException("Error while create container:" + dockerResponse.message());
+//    }
+
   }
 
 }

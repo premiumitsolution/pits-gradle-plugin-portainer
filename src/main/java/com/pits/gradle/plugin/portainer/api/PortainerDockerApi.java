@@ -1,8 +1,12 @@
 package com.pits.gradle.plugin.portainer.api;
 
+import com.pits.gradle.plugin.data.docker.dto.ContainerConfig;
+import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Header;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -33,6 +37,37 @@ public interface PortainerDockerApi {
       @Query(value = "v") Boolean removeAnonymousVolumes,
       @Query(value = "force") Boolean forceKill,
       @Query(value = "link") Boolean removeLink,
+      @Header("Authorization") String authHeader);
+
+  /**
+   * Create an image by either pulling it from a registry or importing it.
+   *
+   * @param endPointId endpoint id
+   * @param imageName image name for create from
+   * @param registryAuth A base64url-encoded auth configuration.
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
+   */
+  @POST("endpoints/{endpointId}/docker/images/create")
+  Call<Void> createImage(@Path("endpointId") Integer endPointId, @Query(value = "fromImage") String imageName,
+      @Header("X-Registry-Auth") String registryAuth,
+      @Header("Authorization") String authHeader);
+
+  /**
+   * Delete container by id.
+   *
+   * @param endPointId endpoint id
+   * @param name Assign the specified name to the container. Must match /?[a-zA-Z0-9_-]+.
+   * @param containerConfig container create config
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
+   */
+  @POST("endpoints/{endpointId}/docker/containers/create")
+  Call<ContainerCreateResponse> createContainer(@Path("endpointId") Integer endPointId,
+      @Body ContainerConfig containerConfig,
+      @Query(value = "name") String name,
       @Header("Authorization") String authHeader);
 
 }

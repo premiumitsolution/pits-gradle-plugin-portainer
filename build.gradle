@@ -53,7 +53,7 @@ test {
     useJUnitPlatform()
 }
 
-task generateContract(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+task generateContractPortainer(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
     description = "Generate DTO + Interface for Decision Contract"
     outputs.upToDateWhen { false }
     outputs.cacheIf { false }
@@ -62,8 +62,27 @@ task generateContract(type: org.openapitools.generator.gradle.plugin.tasks.Gener
     generatorName.set("java")
     inputSpec.set("$rootDir/info/deviantony-Portainer.yaml")
     outputDir.set("$rootDir/info/generated")
-    apiPackage.set("com.pits.gradle.plugin.data.controller")
-    modelPackage.set("com.pits.gradle.plugin.data.dto")
+    apiPackage.set("com.pits.gradle.plugin.data.portainer.controller")
+    modelPackage.set("com.pits.gradle.plugin.data.portainer.dto")
+    configOptions = [
+            dateLibrary     : "java8",
+            interfaceOnly   : "true",
+            gradleBuildFile : "false",
+            exceptionHandler: "false"
+    ]
+}
+
+task generateContractDocker(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    description = "Generate DTO + Interface for Decision Contract"
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+
+    validateSpec.set(true)
+    generatorName.set("java")
+    inputSpec.set("$rootDir/info/docker.yaml")
+    outputDir.set("$rootDir/info/generated")
+    apiPackage.set("com.pits.gradle.plugin.data.docker.controller")
+    modelPackage.set("com.pits.gradle.plugin.data.docker.dto")
     configOptions = [
             dateLibrary     : "java8",
             interfaceOnly   : "true",
@@ -74,7 +93,7 @@ task generateContract(type: org.openapitools.generator.gradle.plugin.tasks.Gener
 
 task updateContract {
     description = "Update contract information from Swagger Contract"
-    dependsOn("cleanGenerated", "generateContract", "updateDtoAndController")
+    dependsOn("cleanGenerated", "generateContractPortainer", "generateContractDocker", "updateDtoAndController")
     doLast {
         println("updateContract done")
     }

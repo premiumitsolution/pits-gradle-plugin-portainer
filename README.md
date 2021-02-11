@@ -19,6 +19,7 @@ portainerSetting {
     containerName = ''
     dockerImageName = ''
     dockerImageTag = ''
+    registryUrl = ''
 }
 ```
 
@@ -30,8 +31,10 @@ portainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru
 
 Deploy '_dockerImageName_':'_dockerImageTag_' to endpoint with the name '_portainerEndPointName_':
 
-- Remove containers (search by '_containerName_') from the endpoint if it's exists;
+- Remove container (search by '_containerName_') from the endpoint if it's exists;
+- Pull image '_dockerImageName_':'_dockerImageTag_' from '_dockerImageTag_';
 - Create container inside the endpoint with specified docker image: '_dockerImageName_':'_dockerImageTag_' and container name: '_containerName_';
+- Start container with container name: '_containerName_'.
 
 ## Usage
 
