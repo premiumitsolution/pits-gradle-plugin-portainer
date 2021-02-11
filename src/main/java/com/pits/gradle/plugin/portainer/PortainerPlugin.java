@@ -20,6 +20,8 @@ public class PortainerPlugin implements Plugin<Project> {
       task.getPortainerPassword().set(portainerSetting.getPortainerPassword());
       task.getPortainerApiUrl().set(portainerSetting.getPortainerApiUrl());
       task.getDockerImageName().set(portainerSetting.getDockerImageName());
+      task.getDockerImageTag().set(portainerSetting.getDockerImageTag());
+      task.getContainerName().set(portainerSetting.getContainerName());
       task.getPortainerEndPointName().set(portainerSetting.getPortainerEndPointName());
     });
   }

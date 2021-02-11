@@ -16,20 +16,22 @@ portainerSetting {
     portainerLogin = ''
     portainerPassword = ''
     portainerEndPointName = ''
+    containerName = ''
     dockerImageName = ''
+    dockerImageTag = ''
 }
 ```
 
-portainerApiUrl - URL for prtainder api, for example: https://repo.yourdomain.ru/api
+portainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
 
 ## Tasks
 
 ### deployImageToPortainer
 
-Deploy '_dockerImageName_' to endpoint with the name '_portainerEndPointName_':
+Deploy '_dockerImageName_':'_dockerImageTag_' to endpoint with the name '_portainerEndPointName_':
 
-- Remove containers (search by image name without tags) from the endpoint if it's exists;
-- Create container inside the endpoint with specified docker image: '_dockerImageName_';
+- Remove containers (search by '_containerName_') from the endpoint if it's exists;
+- Create container inside the endpoint with specified docker image: '_dockerImageName_':'_dockerImageTag_' and container name: '_containerName_';
 
 ## Usage
 

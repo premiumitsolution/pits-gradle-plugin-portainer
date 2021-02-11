@@ -12,11 +12,9 @@ import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
-import com.pits.gradle.plugin.portainer.dto.DockerResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -55,7 +53,13 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   abstract public Property<String> getDockerImageName();
 
   @Input
+  abstract public Property<String> getDockerImageTag();
+
+  @Input
   abstract public Property<String> getPortainerEndPointName();
+
+  @Input
+  abstract public Property<String> getContainerName();
 
   private void initDockerApi() {
     ObjectMapper mapper = new ObjectMapper();
@@ -96,7 +100,6 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
     log.info("Remove old container");
     removeOldContainer(apiToken, endPointId);
-    // TODO:
 
     log.info("Create new container with specified image");
     // TODO:
@@ -129,24 +132,19 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   private void removeOldContainer(String apiToken, Integer endpointId) throws Exception {
     ContainerApi containerApi = new ContainerApi(apiClient);
-    List<ContainerSummary> containerSummaryList = containerApi.endpointContainerList(endpointId, true, null, null, null);
-    if (containerSummaryList != null) {
-      List<ContainerSummary> foundedContainers = containerSummaryList.stream()
-          .filter(containerSummary -> containerSummary.getImage() != null && containerSummary.getImage().contains(getDockerImageName().get()))
-          .collect(Collectors.toList());
-
+    String fillerByName = String.format("{\"name\": [\"%s\"]}", getContainerName().get());
+    List<ContainerSummary> foundedContainers = containerApi.endpointContainerList(endpointId, true, null, null, fillerByName);
+    if ((foundedContainers != null) && (foundedContainers.size() > 0)) {
       for (ContainerSummary containerSummary : foundedContainers) {
         log.info("Remove container with id='{}', name='{}' and image='{}'", containerSummary.getId(), containerSummary.getNames(), containerSummary.getImage());
-        Call<DockerResponse> callDeleteContainer = portainerDockerApi.removeContainer(endpointId, containerSummary.getId(), true, true, false, apiToken);
-        Response<DockerResponse> dockerResponse = callDeleteContainer.execute();
+        Call<Void> callDeleteContainer = portainerDockerApi.removeContainer(endpointId, containerSummary.getId(), true, true, false, apiToken);
+        Response<Void> dockerResponse = callDeleteContainer.execute();
         if (dockerResponse.code() != 204) {
-          if (dockerResponse.body() != null) {
-            throw new RuntimeException(dockerResponse.body().getMessage());
-          } else {
-            throw new RuntimeException(String.format("Error while delete container '%s': %s", containerSummary.getId(), dockerResponse.message()));
-          }
+          throw new RuntimeException(String.format("Error while delete container '%s': %s", containerSummary.getId(), dockerResponse.message()));
         }
       }
+    } else {
+      log.info("There is not containers for remove");
     }
   }
 }

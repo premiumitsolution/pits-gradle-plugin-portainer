@@ -1,6 +1,5 @@
 package com.pits.gradle.plugin.portainer.api;
 
-import com.pits.gradle.plugin.portainer.dto.DockerResponse;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
 import retrofit2.http.Header;
@@ -29,7 +28,7 @@ public interface PortainerDockerApi {
    * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
    */
   @DELETE("endpoints/{endpointId}/docker/containers/{containerId}")
-  Call<DockerResponse> removeContainer(@Path("endpointId") Integer endPointId,
+  Call<Void> removeContainer(@Path("endpointId") Integer endPointId,
       @Path("containerId") String containerId,
       @Query(value = "v") Boolean removeAnonymousVolumes,
       @Query(value = "force") Boolean forceKill,

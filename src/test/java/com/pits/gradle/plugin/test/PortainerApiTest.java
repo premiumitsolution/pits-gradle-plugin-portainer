@@ -12,11 +12,9 @@ import com.pits.gradle.plugin.data.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
-import com.pits.gradle.plugin.portainer.dto.DockerResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
@@ -57,7 +55,7 @@ public class PortainerApiTest {
 
   @Test
   public void testApi() throws Exception {
-    String imageName = "erp/pits-erp-project";
+    String containerName = "pits-erp-project";
 
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
     loggingInterceptor.setLevel(Level.BODY);
@@ -86,26 +84,23 @@ public class PortainerApiTest {
     EndpointSubset endPoint = endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name: qa"));
 
     ContainerApi containerApi = new ContainerApi(apiClient);
-    List<ContainerSummary> containerSummaryList = containerApi.endpointContainerList(endPoint.getId(), true, null, null, null);
+
+    String fillerByName = String.format("{\"name\": [\"%s\"]}", containerName);
+    List<ContainerSummary> foundedContainers = containerApi.endpointContainerList(endPoint.getId(), true, null, null, fillerByName);
 
     PortainerDockerApi portainerDockerApi = initDockerApi();
-    if (containerSummaryList != null) {
-      List<ContainerSummary> foundedContainers = containerSummaryList.stream()
-          .filter(containerSummary -> containerSummary.getImage() != null && containerSummary.getImage().contains(imageName)).collect(Collectors.toList());
-
+    if ((foundedContainers != null) && (foundedContainers.size() > 0)) {
       for (ContainerSummary containerSummary : foundedContainers) {
         System.out.printf("Remove container with id='%s', name='%s' and image='%s'%n", containerSummary.getId(), containerSummary.getNames(),
             containerSummary.getImage());
-        Call<DockerResponse> callDeleteContainer = portainerDockerApi.removeContainer(endPoint.getId(), containerSummary.getId(), true, true, false, apiToken);
-        Response<DockerResponse> dockerResponse = callDeleteContainer.execute();
+        Call<Void> callDeleteContainer = portainerDockerApi.removeContainer(endPoint.getId(), containerSummary.getId(), true, true, false, apiToken);
+        Response<Void> dockerResponse = callDeleteContainer.execute();
         if (dockerResponse.code() != 204) {
-          if (dockerResponse.body() != null) {
-            throw new RuntimeException(dockerResponse.body().getMessage());
-          } else {
-            throw new RuntimeException("Error while delete container:" + dockerResponse.message());
-          }
+          throw new RuntimeException("Error while delete container:" + dockerResponse.message());
         }
       }
+    } else {
+      System.out.println("There is not containers for remove");
     }
   }
 
