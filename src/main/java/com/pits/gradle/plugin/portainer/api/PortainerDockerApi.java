@@ -70,4 +70,18 @@ public interface PortainerDockerApi {
       @Query(value = "name") String name,
       @Header("Authorization") String authHeader);
 
+  /**
+   * Start container by id.
+   *
+   * @param endPointId endpoint id
+   * @param containerId container id
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
+   */
+  @POST("endpoints/{endpointId}/docker/containers/{containerId}/start")
+  Call<Void> startContainer(@Path("endpointId") Integer endPointId,
+      @Path("containerId") String containerId,
+      @Header("Authorization") String authHeader);
+
 }

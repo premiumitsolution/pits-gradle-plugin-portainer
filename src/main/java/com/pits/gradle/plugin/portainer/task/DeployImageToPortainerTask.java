@@ -130,14 +130,22 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     pullImage(apiToken, endPointId);
 
     log.info("Create new container with specified image");
-    createNewContainer(apiToken, endPointId);
+    String containerId = createNewContainer(apiToken, endPointId);
 
     log.info("Start new container with specified image");
-    // TODO:
-
+    startContainer(apiToken, endPointId, containerId);
   }
 
-  private void createNewContainer(String apiToken, Integer endPointId) throws IOException {
+  private void startContainer(String apiToken, Integer endPointId, String containerId) throws IOException {
+    Call<Void> callCreate = portainerDockerApi.startContainer(endPointId, containerId, apiToken);
+    Response<Void> responseCreate = callCreate.execute();
+    if (responseCreate.code() != 204) {
+      throw new RuntimeException("Error while start container:" + responseCreate.message());
+    }
+    log.info("Started new container with id='{}'", containerId);
+  }
+
+  private String createNewContainer(String apiToken, Integer endPointId) throws IOException {
     ContainerCreatePortainerRequest containerConfig = new ContainerCreatePortainerRequest();
     containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
     containerConfig.openStdin(false);
@@ -190,7 +198,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       if (createResponse.getWarnings() != null) {
         createResponse.getWarnings().forEach(sb::add);
       }
-      System.out.printf("Created new container with id='%s', warnings='%s'%n", createResponse.getId(), sb);
+      log.info("Created new container with id='{}', warnings='{}'", createResponse.getId(), sb);
+      return createResponse.getId();
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());
     }

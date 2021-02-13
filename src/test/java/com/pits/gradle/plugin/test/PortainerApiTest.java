@@ -77,6 +77,7 @@ public class PortainerApiTest {
     String imageTag = "1.1.6.24";
     String containerName = "pits-erp-project";
     String ports = "tcp/8007/8087";
+    String endpointName = "dev.erp.pits.com.ru";
 
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
     loggingInterceptor.setLevel(Level.BODY);
@@ -100,9 +101,9 @@ public class PortainerApiTest {
     List<EndpointSubset> endpointList = endpointsApi.endpointList();
 
     Optional<EndpointSubset> endpointSubsetOptional = endpointList.stream()
-        .filter(endpointSubset -> endpointSubset.getName() != null && endpointSubset.getName().equals("dev")).findFirst();
+        .filter(endpointSubset -> endpointSubset.getName() != null && endpointSubset.getName().equals(endpointName)).findFirst();
 
-    EndpointSubset endPoint = endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name: qa"));
+    EndpointSubset endPoint = endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name: " + endpointName));
 
     ContainerApi containerApi = new ContainerApi(apiClient);
 
@@ -190,6 +191,12 @@ public class PortainerApiTest {
         createResponse.getWarnings().forEach(sb::add);
       }
       System.out.printf("Created new container with id='%s', warnings='%s'%n", createResponse.getId(), sb);
+
+      Call<Void> callCreate = portainerDockerApi.startContainer(endPoint.getId(), createResponse.getId(), apiToken);
+      Response<Void> responseCreate = callCreate.execute();
+      if (responseCreate.code() != 204) {
+        throw new RuntimeException("Error while create container:" + responseCreate.message());
+      }
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());
     }
