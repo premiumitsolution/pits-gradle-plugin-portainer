@@ -85,6 +85,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   abstract public Property<String> getPublishedPorts();
 
   private void initDockerApi() {
+    log.info("Initialize initDockerApi");
     Gson gson = new GsonBuilder()
         .setLenient()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -109,31 +110,38 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @TaskAction
   public void deployImage() throws Exception {
-    initDockerApi();
+    try {
+      initDockerApi();
 
-    log.info("Deploy image '{}' to portainer '{}' with endpoint '{}'", getPortainerApiUrl().get(), getDockerImageName().get(),
-        getPortainerEndPointName().get());
+      log.info("Deploy image '{}' to portainer '{}' with endpoint '{}'", getPortainerApiUrl().get(), getDockerImageName().get(),
+          getPortainerEndPointName().get());
 
-    log.info("Initialize portainerApi");
-    init();
+      log.info("Initialize portainerApi");
+      init();
 
-    log.info("Authenticate portainerApi");
-    String apiToken = authenticate();
+      log.info("Authenticate portainerApi");
+      String apiToken = authenticate();
 
-    log.info("Determine endpoint");
-    Integer endPointId = determineEndPoint();
+      log.info("Determine endpoint");
+      Integer endPointId = determineEndPoint();
 
-    log.info("Remove old container");
-    removeOldContainer(apiToken, endPointId);
+      log.info("Remove old container");
+      removeOldContainer(apiToken, endPointId);
 
-    log.info("Pull image container");
-    pullImage(apiToken, endPointId);
+      log.info("Pull image container");
+      pullImage(apiToken, endPointId);
 
-    log.info("Create new container with specified image");
-    String containerId = createNewContainer(apiToken, endPointId);
+      log.info("Create new container with specified image");
+      String containerId = createNewContainer(apiToken, endPointId);
 
-    log.info("Start new container with specified image");
-    startContainer(apiToken, endPointId, containerId);
+      log.info("Start new container with specified image");
+      startContainer(apiToken, endPointId, containerId);
+    } catch (ApiException error) {
+      log.error("Error: '" + error.getMessage() + "' with response:" + error.getResponseBody(), error);
+      throw new Exception(error.getMessage());
+    } catch (Exception error) {
+      log.error(error.getMessage(), error);
+    }
   }
 
   private void startContainer(String apiToken, Integer endPointId, String containerId) throws IOException {
@@ -208,10 +216,10 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   private void pullImage(String apiToken, Integer endPointId) throws IOException {
     String registryAuth = String.format("{\n"
         + "  \"serveraddress\": \"%s\""
-        + "}", getRegistryUrl());
+        + "}", getRegistryUrl().get());
     registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
     Response<Void> createImageResponse = portainerDockerApi
-        .createImage(endPointId, String.format("%s:%s", getDockerImageName(), getDockerImageTag()), registryAuth, apiToken)
+        .createImage(endPointId, String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()), registryAuth, apiToken)
         .execute();
     if (createImageResponse.code() != 200) {
       throw new RuntimeException("Error while pull container:" + createImageResponse.message());
@@ -219,16 +227,24 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   }
 
   private void init() {
-    apiClient = new ApiClient();
-    apiClient.setBasePath(getPortainerApiUrl().get());
+    HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+    loggingInterceptor.setLevel(Level.BODY);
+    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    builder.addInterceptor(loggingInterceptor);
+
+    apiClient = new ApiClient(builder.build());
+    apiClient.setBasePath(getPortainerApiUrl().get().substring(0, getPortainerApiUrl().get().length() - 1));
     apiClient.setUserAgent("");
   }
 
   private String authenticate() throws ApiException {
     AuthApi authApi = new AuthApi(apiClient);
-    AuthenticateUserResponse response = authApi.authenticateUser(new AuthenticateUserRequest()
+
+    AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest()
         .username(getPortainerLogin().get())
-        .password(getPortainerPassword().get()));
+        .password(getPortainerPassword().get());
+
+    AuthenticateUserResponse response = authApi.authenticateUser(authenticateUserRequest);
     apiClient.addDefaultHeader("Authorization", "Bearer " + response.getJwt());
     return response.getJwt();
   }
