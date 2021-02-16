@@ -9,7 +9,7 @@ plugins {
 sourceSets.main.java.srcDirs = ['build/generated-sources/main/java', 'src/main/java']
 
 group 'com.pits.gradle'
-version '1.0.2'
+version '1.0.3'
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
@@ -119,13 +119,13 @@ tasks.named("compileJava") {
 }
 
 pluginBundle {
-    website = 'https://bitbucket.org/premium-it-solution/pits-gradle-plugin-portainer/'
+    website = 'https://github.com/premiumitsolution/pits-gradle-plugin-portainer/'
     vcsUrl = 'https://bitbucket.org/premium-it-solution/pits-gradle-plugin-portainer/'
 
     plugins {
         pitsPortainerPlugin {
             displayName = 'PremiumITSolution Portainer Plugin'
-            description = 'Plugin by for create and start container in portainer.io'
+            description = 'Plugin for create and start container in portainer.io'
             tags = ['portainer', 'docker', 'pits', 'premiumitsolution', 'plextask']
         }
     }
