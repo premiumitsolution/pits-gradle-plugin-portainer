@@ -66,7 +66,7 @@ portainerSetting {
 
 ## Test
 
-Testing with portainer.io version:
+Tested with portainer.io version:
 
 - 2.0.0
 - 2.1.1
