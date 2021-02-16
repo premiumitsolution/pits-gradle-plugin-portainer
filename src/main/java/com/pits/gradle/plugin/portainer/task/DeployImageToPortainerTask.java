@@ -141,6 +141,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       throw new Exception(error.getMessage());
     } catch (Exception error) {
       log.error(error.getMessage(), error);
+      throw new Exception(error.getMessage());
     }
   }
 
