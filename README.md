@@ -50,6 +50,7 @@ To run the plugin execute next command:
 
 ## Example config
 
+```gradle
 portainerSetting {
     portainerApiUrl = 'https://portainer.domain.com/api/'
     portainerLogin = 'deploy'
