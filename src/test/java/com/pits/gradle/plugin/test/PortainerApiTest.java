@@ -135,7 +135,11 @@ public class PortainerApiTest {
     Response<Void> createImageResponse = portainerDockerApi.createImage(endPoint.getId(), String.format("%s:%s", imageName, imageTag), registryAuth, apiToken)
         .execute();
     if (createImageResponse.code() != 200) {
-      throw new RuntimeException("Error while pull container:" + createImageResponse.message());
+      String message = "Error while pull container:" + createImageResponse.message();
+      if (createImageResponse.errorBody() != null) {
+        message += " with error - " + createImageResponse.errorBody().string();
+      }
+      throw new RuntimeException(message);
     }
 
     // Create container

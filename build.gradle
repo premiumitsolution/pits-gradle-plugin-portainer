@@ -9,7 +9,7 @@ plugins {
 sourceSets.main.java.srcDirs = ['build/generated-sources/main/java', 'src/main/java']
 
 group 'com.pits.gradle'
-version '1.0.0'
+version '1.0.1'
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
