@@ -169,7 +169,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
         Response<Image> imageInfoCallResponse = imageInfoCall.execute();
         if (imageInfoCallResponse.code() == 200) {
           Image imageDetail = imageInfoCallResponse.body();
-          if ((imageDetail.getContainer() != null) && (!imageDetail.getContainer().equals(""))) {
+          if ((imageDetail.getContainer() != null) && (!imageDetail.getContainer().equals("")) && (!imageDetail.getRepoTags().get(0)
+              .contains(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get())))) {
             //Remove container
             log.info("Remove image with id='{}'", imageDetail.getId());
             Call<List<ImageDeleteResponseItem>> removeImageCall = portainerDockerApi.removeImage(endPointId, imageDetail.getId(), apiToken);
