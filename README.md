@@ -21,6 +21,7 @@ portainerSetting {
     dockerImageTag = ''
     registryUrl = ''
     publishedPorts = ''
+    removeOldImages = false
 }
 ```
 
@@ -61,7 +62,8 @@ portainerSetting {
     dockerImageName = 'portainer.domain.com/org/project-1'
     dockerImageTag = '1.0.0'
     registryUrl = 'portainer.domain.com'
-    publishedPorts = 'tcp/8007/8007'
+    publishedPorts = 'tcp/8007/8007',
+    removeOldImages = true
 }
 ```
 
