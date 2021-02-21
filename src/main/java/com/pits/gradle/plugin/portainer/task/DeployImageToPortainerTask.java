@@ -6,6 +6,8 @@ import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
 import com.pits.gradle.plugin.data.docker.dto.EndpointIPAMConfig;
 import com.pits.gradle.plugin.data.docker.dto.EndpointSettings;
 import com.pits.gradle.plugin.data.docker.dto.HostConfig;
+import com.pits.gradle.plugin.data.docker.dto.Image;
+import com.pits.gradle.plugin.data.docker.dto.ImageDeleteResponseItem;
 import com.pits.gradle.plugin.data.docker.dto.NetworkingConfig;
 import com.pits.gradle.plugin.data.docker.dto.PortBinding;
 import com.pits.gradle.plugin.data.docker.dto.RestartPolicy;
@@ -32,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -83,6 +86,9 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @Input
   abstract public Property<String> getPublishedPorts();
+
+  @Input
+  abstract public Property<Boolean> getRemoveOldImages();
 
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
@@ -136,12 +142,48 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
       log.info("Start new container with specified image");
       startContainer(apiToken, endPointId, containerId);
+
+      if (getRemoveOldImages().get()) {
+        log.info("Remove old images");
+        removeOldImages(apiToken, endPointId);
+      }
     } catch (ApiException error) {
       log.error("Error: '" + error.getMessage() + "' with response:" + error.getResponseBody(), error);
       throw new Exception(error.getMessage());
     } catch (Exception error) {
       log.error(error.getMessage(), error);
       throw new Exception(error.getMessage());
+    }
+  }
+
+  private void removeOldImages(String apiToken, Integer endPointId) throws IOException {
+    Call<List<Image>> imageListCall = portainerDockerApi.getImageList(endPointId, false, apiToken);
+    Response<List<Image>> imageListCallResponse = imageListCall.execute();
+    if (imageListCallResponse.code() == 200) {
+      List<Image> oldImages = imageListCallResponse.body().stream()
+          .filter(image -> image.getRepoTags().stream().filter(imageTagValue -> imageTagValue.contains(getDockerImageName().get())).count() > 0)
+          .collect(Collectors.toList());
+
+      for (Image imageInfo : oldImages) {
+        Call<Image> imageInfoCall = portainerDockerApi.getImageInfo(endPointId, imageInfo.getId(), apiToken);
+        Response<Image> imageInfoCallResponse = imageInfoCall.execute();
+        if (imageInfoCallResponse.code() == 200) {
+          Image imageDetail = imageInfoCallResponse.body();
+          if ((imageDetail.getContainer() != null) && (!imageDetail.getContainer().equals(""))) {
+            //Remove container
+            log.info("Remove image with id='{}'", imageDetail.getId());
+            Call<List<ImageDeleteResponseItem>> removeImageCall = portainerDockerApi.removeImage(endPointId, imageDetail.getId(), apiToken);
+            Response<List<ImageDeleteResponseItem>> removeImageCallResponse = removeImageCall.execute();
+            if (removeImageCallResponse.code() != 200) {
+              throw new RuntimeException("Error remove image:" + removeImageCallResponse.message());
+            }
+          }
+        } else {
+          throw new RuntimeException("Error get image info:" + imageInfoCallResponse.message());
+        }
+      }
+    } else {
+      throw new RuntimeException("Error while get images list:" + imageListCallResponse.message());
     }
   }
 

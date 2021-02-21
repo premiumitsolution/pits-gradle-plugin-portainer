@@ -125,7 +125,7 @@ pluginBundle {
     plugins {
         pitsPortainerPlugin {
             displayName = 'PremiumITSolution Portainer Plugin'
-            description = 'Plugin for create and start container in portainer.io'
+            description = 'Add parameter for delete old images from portainer'
             tags = ['portainer', 'docker', 'pits', 'premiumitsolution', 'plextask']
         }
     }

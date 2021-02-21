@@ -25,6 +25,7 @@ public class PortainerPlugin implements Plugin<Project> {
       task.getRegistryUrl().set(portainerSetting.getRegistryUrl());
       task.getPortainerEndPointName().set(portainerSetting.getPortainerEndPointName());
       task.getPublishedPorts().set(portainerSetting.getPublishedPorts());
+      task.getRemoveOldImages().set(portainerSetting.getRemoveOldImages());
     });
   }
 }

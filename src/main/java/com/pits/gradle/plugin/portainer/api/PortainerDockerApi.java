@@ -1,10 +1,14 @@
 package com.pits.gradle.plugin.portainer.api;
 
 import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
+import com.pits.gradle.plugin.data.docker.dto.Image;
+import com.pits.gradle.plugin.data.docker.dto.ImageDeleteResponseItem;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
+import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -82,6 +86,46 @@ public interface PortainerDockerApi {
   @POST("endpoints/{endpointId}/docker/containers/{containerId}/start")
   Call<Void> startContainer(@Path("endpointId") Integer endPointId,
       @Path("containerId") String containerId,
+      @Header("Authorization") String authHeader);
+
+  /**
+   * Returns a list of images on the server. Note that it uses a different, smaller representation of an image than inspecting a single image.
+   *
+   * @param endPointId endpoint id
+   * @param dangling dangling
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
+   */
+  @GET("endpoints/{endpointId}/docker/images/json")
+  Call<List<Image>> getImageList(@Path("endpointId") Integer endPointId, @Query(value = "dangling") boolean dangling,
+      @Header("Authorization") String authHeader);
+
+  /**
+   * Return low-level information about an image.
+   *
+   * @param endPointId endpoint id
+   * @param imageId image id
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.41/#operation/ImageInspect">Docker Inspect an image</a>
+   */
+  @GET("endpoints/{endpointId}/docker/images/{imageId}/json")
+  Call<Image> getImageInfo(@Path("endpointId") Integer endPointId, @Path("imageId") String imageId,
+      @Header("Authorization") String authHeader);
+
+  /**
+   * Remove an image, along with any untagged parent images that were referenced by that image. Images can't be removed if they have descendant images, are
+   * being used by a running container or are being used by a build.
+   *
+   * @param endPointId endpoint id
+   * @param imageId image id
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.41/#operation/ImageDelete">Docker ImageDelete</a>
+   */
+  @DELETE("endpoints/{endpointId}/docker/images/{imageId}")
+  Call<List<ImageDeleteResponseItem>> removeImage(@Path("endpointId") Integer endPointId, @Path("imageId") String imageId,
       @Header("Authorization") String authHeader);
 
 }

@@ -27,5 +27,7 @@ public abstract class PortainerSetting {
 
   abstract public Property<String> getPublishedPorts();
 
+  abstract public Property<Boolean> getRemoveOldImages();
+
 
 }
