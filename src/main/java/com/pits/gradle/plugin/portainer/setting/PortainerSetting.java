@@ -29,5 +29,7 @@ public abstract class PortainerSetting {
 
   abstract public Property<Boolean> getRemoveOldImages();
 
+  abstract public Property<String> getRestartPolicy();
+
 
 }

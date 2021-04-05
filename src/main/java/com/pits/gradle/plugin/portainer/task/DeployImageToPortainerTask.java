@@ -90,6 +90,9 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   @Input
   abstract public Property<Boolean> getRemoveOldImages();
 
+  @Input
+  abstract public Property<String> getRestartPolicy();
+
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
     Gson gson = new GsonBuilder()
@@ -210,10 +213,23 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       if (portArray.length > 0) {
         Map<String, Object> exposedPorts = new HashMap<>();
         Map<String, List<PortBinding>> hostPortBindings = new HashMap<>();
+        RestartPolicy restartPolicy;
+        switch (getRestartPolicy().get()) {
+          case "onFailure":
+            restartPolicy = new RestartPolicy().name(NameEnum.ON_FAILURE);
+            break;
+          case "unlessStopped":
+            restartPolicy = new RestartPolicy().name(NameEnum.UNLESS_STOPPED);
+            break;
+          case "always":
+          default:
+            restartPolicy = new RestartPolicy().name(NameEnum.ALWAYS);
+            break;
+        }
 
         HostConfig hostConfig = new HostConfig()
             .networkMode("bridge")
-            .restartPolicy(new RestartPolicy().name(NameEnum.EMPTY))
+            .restartPolicy(restartPolicy)
             .publishAllPorts(false)
             .autoRemove(false)
             .privileged(false)
