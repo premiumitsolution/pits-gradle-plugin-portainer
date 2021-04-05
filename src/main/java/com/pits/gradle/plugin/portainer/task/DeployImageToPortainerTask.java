@@ -161,7 +161,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     Response<List<Image>> imageListCallResponse = imageListCall.execute();
     if (imageListCallResponse.code() == 200) {
       List<Image> oldImages = imageListCallResponse.body().stream()
-          .filter(image -> image.getRepoTags().stream().filter(imageTagValue -> imageTagValue.contains(getDockerImageName().get())).count() > 0)
+          .filter(image -> image.getRepoTags() != null
+              && image.getRepoTags().stream().filter(imageTagValue -> imageTagValue.contains(getDockerImageName().get())).count() > 0)
           .collect(Collectors.toList());
 
       for (Image imageInfo : oldImages) {

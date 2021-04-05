@@ -2,6 +2,12 @@
 
 [![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.4-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
 
+## Version History
+
+### 1.0.6
+
+- Исправлен вылет при пустом RepoTag
+
 ## Enabling the plugin
 
 Add to your `build.gradle`:
@@ -68,7 +74,6 @@ portainerSetting {
 ```
 
 ## Test
-
 Tested with portainer.io version:
 
 - 2.0.0
