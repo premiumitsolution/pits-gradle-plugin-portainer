@@ -15,7 +15,7 @@ Add to your `build.gradle`:
 
 ```gradle
 plugins {
-  id "com.pits.gradle.plugin.portainer" version "1.0.4"
+  id "com.pits.gradle.plugin.portainer" version "1.0.6"
 }
 
 portainerSetting {
