@@ -4,7 +4,7 @@
 
 ## Version History
 
-### 1.0.6
+### 1.0.7
 
 - Исправлен вылет при пустом RepoTag
 - Добавлена возможность задавать restartPolicy - 'always', 'onFailure', 'unlessStopped'
