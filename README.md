@@ -1,6 +1,13 @@
 # Premium IT Solution Portainer.io gradle plugin
 
-[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.4-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
+[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.7-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
+
+## Version History
+
+### 1.0.7
+
+- Исправлен вылет при пустом RepoTag
+- Добавлена возможность задавать restartPolicy - 'always', 'onFailure', 'unlessStopped'
 
 ## Enabling the plugin
 
@@ -8,7 +15,7 @@ Add to your `build.gradle`:
 
 ```gradle
 plugins {
-  id "com.pits.gradle.plugin.portainer" version "1.0.4"
+  id "com.pits.gradle.plugin.portainer" version "1.0.6"
 }
 
 portainerSetting {
@@ -21,13 +28,14 @@ portainerSetting {
     dockerImageTag = ''
     registryUrl = ''
     publishedPorts = ''
+    restartPolicy = ''
     removeOldImages = false
 }
 ```
 
 portainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
-publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For exmaple: tcp/8080/80, tcp/8081/88 
-removeOldImages - if true, the old images will be removed from portainer.io
+publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For exmaple: tcp/8080/80, tcp/8081/88 removeOldImages - if
+true, the old images will be removed from portainer.io restartPolicy - 'always', 'onFailure', 'unlessStopped'
 
 ## Tasks
 
@@ -68,7 +76,6 @@ portainerSetting {
 ```
 
 ## Test
-
 Tested with portainer.io version:
 
 - 2.0.0
