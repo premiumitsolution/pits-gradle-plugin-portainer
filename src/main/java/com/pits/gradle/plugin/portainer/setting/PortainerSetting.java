@@ -1,5 +1,8 @@
 package com.pits.gradle.plugin.portainer.setting;
 
+import lombok.Getter;
+import org.gradle.api.Action;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 
 /**
@@ -8,6 +11,17 @@ import org.gradle.api.provider.Property;
  * @since 1.0.0
  */
 public abstract class PortainerSetting {
+
+  @Getter
+  private final ContainerAccessSetting containerAccess;
+
+  public PortainerSetting(ObjectFactory objects) {
+    this.containerAccess = objects.newInstance(ContainerAccessSetting.class);
+  }
+
+  public void containerAccess(Action<? super ContainerAccessSetting> action) {
+    action.execute(containerAccess);
+  }
 
   abstract public Property<String> getPortainerApiUrl();
 
@@ -30,6 +44,5 @@ public abstract class PortainerSetting {
   abstract public Property<Boolean> getRemoveOldImages();
 
   abstract public Property<String> getRestartPolicy();
-
 
 }

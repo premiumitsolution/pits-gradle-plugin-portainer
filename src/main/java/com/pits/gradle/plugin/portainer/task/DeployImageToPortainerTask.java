@@ -2,7 +2,6 @@ package com.pits.gradle.plugin.portainer.task;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
 import com.pits.gradle.plugin.data.docker.dto.EndpointIPAMConfig;
 import com.pits.gradle.plugin.data.docker.dto.EndpointSettings;
 import com.pits.gradle.plugin.data.docker.dto.HostConfig;
@@ -23,6 +22,8 @@ import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
+import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
+import com.pits.gradle.plugin.portainer.setting.ContainerAccessSetting;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -92,6 +93,9 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @Input
   abstract public Property<String> getRestartPolicy();
+
+  @Input
+  abstract public Property<ContainerAccessSetting> getContainerAccess();
 
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
@@ -207,34 +211,34 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     containerConfig.openStdin(false);
     containerConfig.tty(false);
 
+    RestartPolicy restartPolicy;
+    switch (getRestartPolicy().get()) {
+      case "onFailure":
+        restartPolicy = new RestartPolicy().name(NameEnum.ON_FAILURE);
+        break;
+      case "unlessStopped":
+        restartPolicy = new RestartPolicy().name(NameEnum.UNLESS_STOPPED);
+        break;
+      case "always":
+      default:
+        restartPolicy = new RestartPolicy().name(NameEnum.ALWAYS);
+        break;
+    }
+
+    HostConfig hostConfig = new HostConfig()
+        .networkMode("bridge")
+        .restartPolicy(restartPolicy)
+        .publishAllPorts(false)
+        .autoRemove(false)
+        .privileged(false)
+        .init(false);
+
     String ports = getPublishedPorts().getOrNull();
     if (ports != null) {
       String[] portArray = ports.split(",");
       if (portArray.length > 0) {
         Map<String, Object> exposedPorts = new HashMap<>();
         Map<String, List<PortBinding>> hostPortBindings = new HashMap<>();
-        RestartPolicy restartPolicy;
-        switch (getRestartPolicy().get()) {
-          case "onFailure":
-            restartPolicy = new RestartPolicy().name(NameEnum.ON_FAILURE);
-            break;
-          case "unlessStopped":
-            restartPolicy = new RestartPolicy().name(NameEnum.UNLESS_STOPPED);
-            break;
-          case "always":
-          default:
-            restartPolicy = new RestartPolicy().name(NameEnum.ALWAYS);
-            break;
-        }
-
-        HostConfig hostConfig = new HostConfig()
-            .networkMode("bridge")
-            .restartPolicy(restartPolicy)
-            .publishAllPorts(false)
-            .autoRemove(false)
-            .privileged(false)
-            .init(false);
-
         Arrays.stream(portArray).map(s -> s.split("/")).forEach(strings -> {
           String protocol = strings[0].trim();
           String containerPort = strings[1].trim();
@@ -259,15 +263,19 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       }
     }
 
-    Call<ContainerCreateResponse> callDeleteContainer = portainerDockerApi.createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
-    Response<ContainerCreateResponse> dockerResponse = callDeleteContainer.execute();
+    Call<ContainerCreatePortainerResponse> callDeleteContainer = portainerDockerApi
+        .createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
+    Response<ContainerCreatePortainerResponse> dockerResponse = callDeleteContainer.execute();
     if ((dockerResponse.code() == 200) || (dockerResponse.code() == 201)) {
-      ContainerCreateResponse createResponse = dockerResponse.body();
+      ContainerCreatePortainerResponse createResponse = dockerResponse.body();
       StringJoiner sb = new StringJoiner("\n");
       if (createResponse.getWarnings() != null) {
         createResponse.getWarnings().forEach(sb::add);
       }
       log.info("Created new container with id='{}', warnings='{}'", createResponse.getId(), sb);
+
+      //Установка прав доступа к созданному контейнеру
+
       return createResponse.getId();
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());

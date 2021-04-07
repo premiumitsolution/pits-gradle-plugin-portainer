@@ -1,9 +1,9 @@
 package com.pits.gradle.plugin.portainer.api;
 
-import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
 import com.pits.gradle.plugin.data.docker.dto.Image;
 import com.pits.gradle.plugin.data.docker.dto.ImageDeleteResponseItem;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
+import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -59,7 +59,7 @@ public interface PortainerDockerApi {
       @Header("Authorization") String authHeader);
 
   /**
-   * Delete container by id.
+   * Create container by id.
    *
    * @param endPointId endpoint id
    * @param name Assign the specified name to the container. Must match /?[a-zA-Z0-9_-]+.
@@ -69,7 +69,7 @@ public interface PortainerDockerApi {
    * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
    */
   @POST("endpoints/{endpointId}/docker/containers/create")
-  Call<ContainerCreateResponse> createContainer(@Path("endpointId") Integer endPointId,
+  Call<ContainerCreatePortainerResponse> createContainer(@Path("endpointId") Integer endPointId,
       @Body ContainerCreatePortainerRequest containerConfig,
       @Query(value = "name") String name,
       @Header("Authorization") String authHeader);
