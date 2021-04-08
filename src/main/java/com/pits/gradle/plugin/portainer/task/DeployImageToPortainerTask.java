@@ -156,10 +156,10 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       }
     } catch (ApiException error) {
       log.error("Error: '" + error.getMessage() + "' with response:" + error.getResponseBody(), error);
-      throw new Exception(error.getMessage());
+      throw new Exception(error);
     } catch (Exception error) {
       log.error(error.getMessage(), error);
-      throw new Exception(error.getMessage());
+      throw new Exception(error);
     }
   }
 
@@ -272,7 +272,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       if (createResponse.getWarnings() != null) {
         createResponse.getWarnings().forEach(sb::add);
       }
-      log.info("Created new container with id='{}', warnings='{}'", createResponse.getId(), sb);
+      log.info("Created new container with id='{}', resourceId={}, warnings='{}'", createResponse.getId(),
+          createResponse.getPortainer().getResourceControl().getResourceID(), sb);
 
       //Установка прав доступа к созданному контейнеру
 

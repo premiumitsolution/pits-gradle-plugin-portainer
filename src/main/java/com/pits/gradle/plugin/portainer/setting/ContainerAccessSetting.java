@@ -1,5 +1,6 @@
 package com.pits.gradle.plugin.portainer.setting;
 
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 
 /**
@@ -9,10 +10,11 @@ import org.gradle.api.provider.Property;
  */
 public abstract class ContainerAccessSetting {
 
+  abstract public ListProperty<String> getTeams();
+
   abstract public Property<Boolean> getAdministratorsOnly();
 
   abstract public Property<Boolean> getPublicAccess();
 
-  abstract public Property<String[]> getTeams();
 
 }
