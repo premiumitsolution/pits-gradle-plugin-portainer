@@ -57,8 +57,8 @@ task generateContractPortainer(type: org.openapitools.generator.gradle.plugin.ta
     description = "Generate DTO + Interface for Decision Contract"
     outputs.upToDateWhen { false }
     outputs.cacheIf { false }
-
-    validateSpec.set(true)
+    skipValidateSpec.set(true)
+    validateSpec.set(false)
     generatorName.set("java")
     inputSpec.set("$rootDir/info/deviantony-Portainer.yaml")
     outputDir.set("$rootDir/info/generated")
@@ -77,7 +77,8 @@ task generateContractDocker(type: org.openapitools.generator.gradle.plugin.tasks
     outputs.upToDateWhen { false }
     outputs.cacheIf { false }
 
-    validateSpec.set(true)
+    skipValidateSpec.set(true)
+    validateSpec.set(false)
     generatorName.set("java")
     inputSpec.set("$rootDir/info/docker.yaml")
     outputDir.set("$rootDir/info/generated")

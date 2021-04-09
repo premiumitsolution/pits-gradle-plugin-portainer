@@ -16,10 +16,14 @@ import com.pits.gradle.plugin.data.portainer.ApiException;
 import com.pits.gradle.plugin.data.portainer.controller.AuthApi;
 import com.pits.gradle.plugin.data.portainer.controller.ContainerApi;
 import com.pits.gradle.plugin.data.portainer.controller.EndpointsApi;
-import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserRequest;
-import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
+import com.pits.gradle.plugin.data.portainer.controller.ResourceControlsApi;
+import com.pits.gradle.plugin.data.portainer.controller.TeamsApi;
+import com.pits.gradle.plugin.data.portainer.dto.AuthAuthenticatePayload;
+import com.pits.gradle.plugin.data.portainer.dto.AuthAuthenticateResponse;
 import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
-import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
+import com.pits.gradle.plugin.data.portainer.dto.PortainerEndpoint;
+import com.pits.gradle.plugin.data.portainer.dto.PortainerTeam;
+import com.pits.gradle.plugin.data.portainer.dto.ResourcecontrolsResourceControlUpdatePayload;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
@@ -205,7 +209,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     log.info("Started new container with id='{}'", containerId);
   }
 
-  private String createNewContainer(String apiToken, Integer endPointId) throws IOException {
+  private String createNewContainer(String apiToken, Integer endPointId) throws IOException, ApiException {
     ContainerCreatePortainerRequest containerConfig = new ContainerCreatePortainerRequest();
     containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
     containerConfig.openStdin(false);
@@ -273,14 +277,43 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
         createResponse.getWarnings().forEach(sb::add);
       }
       log.info("Created new container with id='{}', resourceId={}, warnings='{}'", createResponse.getId(),
-          createResponse.getPortainer().getResourceControl().getResourceID(), sb);
+          createResponse.getPortainer().getResourceControl().getId(), sb);
 
       //Установка прав доступа к созданному контейнеру
+      setupContainerSecurity(createResponse);
 
       return createResponse.getId();
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());
     }
+  }
+
+  private void setupContainerSecurity(ContainerCreatePortainerResponse createResponse) throws ApiException {
+    Integer resourceControlId = createResponse.getPortainer().getResourceControl().getId();
+    List<PortainerTeam> portainerTeamList = getPortainerTeamList();
+    Map<String, Integer> teamMap = portainerTeamList.stream().collect(Collectors.toMap(PortainerTeam::getName, PortainerTeam::getId));
+
+    ResourceControlsApi resourceControlsApi = new ResourceControlsApi(apiClient);
+
+    ContainerAccessSetting containerAccessSetting = getContainerAccess().get();
+    ResourcecontrolsResourceControlUpdatePayload updateData = new ResourcecontrolsResourceControlUpdatePayload()
+        .administratorsOnly(containerAccessSetting.getAdministratorsOnly().get())
+        ._public(containerAccessSetting.getPublicAccess().get());
+
+    containerAccessSetting.getTeams().get().forEach(teamCode -> {
+      if (teamMap.containsKey(teamCode)) {
+        updateData.addTeamsItem(teamMap.get(teamCode));
+      } else {
+        log.error("Can't found team by code:'{}'", teamCode);
+      }
+    });
+
+    resourceControlsApi.resourceControlUpdate(resourceControlId, updateData);
+  }
+
+  private List<PortainerTeam> getPortainerTeamList() throws ApiException {
+    TeamsApi teamsApi = new TeamsApi(apiClient);
+    return teamsApi.teamList();
   }
 
   private void pullImage(String apiToken, Integer endPointId) throws IOException {
@@ -309,23 +342,20 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   private String authenticate() throws ApiException {
     AuthApi authApi = new AuthApi(apiClient);
-
-    AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest()
+    AuthAuthenticatePayload authenticateUserRequest = new AuthAuthenticatePayload()
         .username(getPortainerLogin().get())
         .password(getPortainerPassword().get());
 
-    AuthenticateUserResponse response = authApi.authenticateUser(authenticateUserRequest);
+    AuthAuthenticateResponse response = authApi.authenticateUser(authenticateUserRequest);
     apiClient.addDefaultHeader("Authorization", "Bearer " + response.getJwt());
     return response.getJwt();
   }
 
   private Integer determineEndPoint() throws ApiException {
     EndpointsApi endpointsApi = new EndpointsApi(apiClient);
-    List<EndpointSubset> endpointList = endpointsApi.endpointList();
-
-    Optional<EndpointSubset> endpointSubsetOptional = endpointList.stream()
+    List<PortainerEndpoint> endpointList = endpointsApi.endpointList(null, null, null, null, null, null, null, null);
+    Optional<PortainerEndpoint> endpointSubsetOptional = endpointList.stream()
         .filter(endpointSubset -> endpointSubset.getName() != null && endpointSubset.getName().equals(getPortainerEndPointName().get())).findFirst();
-
     return endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name:" + getPortainerEndPointName().get())).getId();
   }
 
