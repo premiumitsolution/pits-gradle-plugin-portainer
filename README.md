@@ -1,11 +1,13 @@
 # Premium IT Solution Portainer.io gradle plugin
 
-[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.7-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
+[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.8-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
 
 ## Version History
 
-### 1.0.7
+### 1.0.8
+- Добавлена возможность задавать права доступа для создаваемого контейнера
 
+### 1.0.7
 - Исправлен вылет при пустом RepoTag
 - Добавлена возможность задавать restartPolicy - 'always', 'onFailure', 'unlessStopped'
 
@@ -15,7 +17,7 @@ Add to your `build.gradle`:
 
 ```gradle
 plugins {
-  id "com.pits.gradle.plugin.portainer" version "1.0.6"
+  id "com.pits.gradle.plugin.portainer" version "1.0.8"
 }
 
 portainerSetting {
@@ -30,12 +32,20 @@ portainerSetting {
     publishedPorts = ''
     restartPolicy = ''
     removeOldImages = false
+    containerAccess {
+        administratorsOnly = false
+        publicAccess = false
+        teams = ['development']
+    }
 }
 ```
+sportainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
 
-portainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
-publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For exmaple: tcp/8080/80, tcp/8081/88 removeOldImages - if
-true, the old images will be removed from portainer.io restartPolicy - 'always', 'onFailure', 'unlessStopped'
+publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For example: tcp/8080/80, tcp/8081/8888
+
+removeOldImages - if true, the old images will be removed from portainer.io restartPolicy - 'always', 'onFailure', 'unlessStopped'
+
+containerAccess - access level for container
 
 ## Tasks
 
