@@ -213,88 +213,6 @@ paths:
           description: Server error
       security:
         - jwt: [ ]
-    post:
-      tags:
-        - custom_templates
-      summary: Create a custom template
-      description: |-
-        Create a custom template.
-        **Access policy**: authenticated
-      operationId: CustomTemplateCreate
-      consumes:
-        - application/json
-        - ' multipart/form-data'
-      produces:
-        - application/json
-      parameters:
-        - name: method
-          in: query
-          description: method for creating template
-          required: true
-          type: string
-          enum:
-            - string
-            - file
-            - repository
-        - in: body
-          name: body_string
-          description: Required when using method=string
-          required: false
-          schema:
-            $ref: '#/definitions/customtemplates.customTemplateFromFileContentPayload'
-        - in: body
-          name: body_repository
-          description: Required when using method=repository
-          required: false
-          schema:
-            $ref: '#/definitions/customtemplates.customTemplateFromGitRepositoryPayload'
-        - name: Title
-          in: formData
-          description: Title of the template. required when method is file
-          required: false
-          type: string
-        - name: Description
-          in: formData
-          description: Description of the template. required when method is file
-          required: false
-          type: string
-        - name: Note
-          in: formData
-          description: A note that will be displayed in the UI. Supports HTML content
-          required: false
-          type: string
-        - name: Platform
-          in: formData
-          description: Platform associated to the template (1 - 'linux', 2 - 'windows'). required when method is file
-          required: false
-          type: integer
-          enum:
-            - 1
-            - 2
-        - name: Type
-          in: formData
-          description: Type of created stack (1 - swarm, 2 - compose), required when method is file
-          required: false
-          type: integer
-          enum:
-            - 1
-            - 2
-        - name: file
-          in: formData
-          description: required when method is file
-          required: false
-          type: file
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/portainer.CustomTemplate'
-        "400":
-          description: Invalid request
-        "500":
-          description: Server error
-      security:
-        - jwt: [ ]
   /custom_templates/{id}:
     get:
       tags:
@@ -2465,97 +2383,6 @@ paths:
           description: Server error
       security:
         - jwt: [ ]
-    post:
-      tags:
-        - stacks
-      summary: Deploy a new stack
-      description: |-
-        Deploy a new stack into a Docker environment specified via the endpoint identifier.
-        **Access policy**: restricted
-      operationId: StackCreate
-      consumes:
-        - application/json
-        - ' multipart/form-data'
-      produces:
-        - application/json
-      parameters:
-        - name: type
-          in: query
-          description: 'Stack deployment type. Possible values: 1 (Swarm stack) or 2 (Compose stack).'
-          required: true
-          type: integer
-          enum:
-            - 1
-            - 2
-        - name: method
-          in: query
-          description: 'Stack deployment method. Possible values: file, string or repository.'
-          required: true
-          type: string
-          enum:
-            - string
-            - file
-            - repository
-        - name: endpointId
-          in: query
-          description: Identifier of the endpoint that will be used to deploy the stack
-          required: true
-          type: integer
-        - in: body
-          name: body_swarm_string
-          description: Required when using method=string and type=1
-          required: false
-          schema:
-            $ref: '#/definitions/stacks.swarmStackFromFileContentPayload'
-        - in: body
-          name: body_swarm_repository
-          description: Required when using method=repository and type=1
-          required: false
-          schema:
-            $ref: '#/definitions/stacks.swarmStackFromGitRepositoryPayload'
-        - in: body
-          name: body_compose_string
-          description: Required when using method=string and type=2
-          required: false
-          schema:
-            $ref: '#/definitions/stacks.composeStackFromFileContentPayload'
-        - in: body
-          name: body_compose_repository
-          description: Required when using method=repository and type=2
-          required: false
-          schema:
-            $ref: '#/definitions/stacks.composeStackFromGitRepositoryPayload'
-        - name: Name
-          in: formData
-          description: Name of the stack. required when method is file
-          required: false
-          type: string
-        - name: SwarmID
-          in: formData
-          description: Swarm cluster identifier. Required when method equals file and type equals 1. required when method is file
-          required: false
-          type: string
-        - name: Env
-          in: formData
-          description: 'Environment variables passed during deployment, represented as a JSON array [{''name'': ''name'', ''value'': ''value''}]. Optional, used when method equals file and type equals 1.'
-          required: false
-          type: string
-        - name: file
-          in: formData
-          description: Stack file. required when method is file
-          required: false
-          type: file
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/portainer.CustomTemplate'
-        "400":
-          description: Invalid request
-        "500":
-          description: Server error
-      security:
-        - jwt: [ ]
   /stacks/{id}:
     get:
       tags:
@@ -3971,6 +3798,48 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Mount"
+
+  EndpointIPAMConfig:
+    description: |
+      EndpointIPAMConfig represents an endpoint's IPAM configuration.
+    type: "object"
+    x-nullable: true
+    properties:
+      IPv4Address:
+        type: "string"
+        example: "172.20.30.33"
+      IPv6Address:
+        type: "string"
+        example: "2001:db8:abcd::3033"
+      LinkLocalIPs:
+        type: "array"
+        items:
+          type: "string"
+        example:
+          - "169.254.34.68"
+          - "fe80::3468"
+
+  EndpointSettings:
+    description: "Configuration for a network endpoint."
+    type: "object"
+    properties:
+      # Configurations
+      IPAMConfig:
+        $ref: "#/definitions/EndpointIPAMConfig"
+      Links:
+        type: "array"
+        items:
+          type: "string"
+        example:
+          - "container_1"
+          - "container_2"
+      Aliases:
+        type: "array"
+        items:
+          type: "string"
+        example:
+          - "server_x"
+          - "server_y"
 
   Mount:
     type: "object"
