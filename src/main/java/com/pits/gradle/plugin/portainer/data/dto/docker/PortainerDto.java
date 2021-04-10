@@ -1,7 +1,7 @@
 package com.pits.gradle.plugin.portainer.data.dto.docker;
 
 import com.google.gson.annotations.SerializedName;
-import com.pits.gradle.plugin.data.portainer.dto.PortainerResourceControl;
+import com.pits.gradle.plugin.data.portainer.dto.ResourceControl;
 import lombok.Data;
 
 /**
@@ -13,6 +13,6 @@ import lombok.Data;
 public class PortainerDto {
 
   @SerializedName("ResourceControl")
-  private PortainerResourceControl resourceControl;
+  private ResourceControl resourceControl;
 
 }
