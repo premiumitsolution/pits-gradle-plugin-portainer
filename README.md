@@ -82,6 +82,11 @@ portainerSetting {
     registryUrl = 'portainer.domain.com'
     publishedPorts = 'tcp/8007/8007',
     removeOldImages = true
+    containerAccess {
+        administratorsOnly = false
+        publicAccess = false
+        teams = ['development']
+    }
 }
 ```
 
