@@ -45,6 +45,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
@@ -100,6 +102,12 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @Input
   abstract public Property<ContainerAccessSetting> getContainerAccess();
+
+  @Input
+  abstract public MapProperty<String, Object> getVolumes();
+
+  @Input
+  abstract public ListProperty<String> getBindings();
 
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
@@ -214,6 +222,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
     containerConfig.openStdin(false);
     containerConfig.tty(false);
+    containerConfig.volumes(getVolumes().get());
+
 
     RestartPolicy restartPolicy;
     switch (getRestartPolicy().get()) {
@@ -256,6 +266,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
           hostPortBindings.put(exposeValue, Collections.singletonList(new PortBinding().hostPort(hostPort)));
         });
         hostConfig.portBindings(hostPortBindings);
+        hostConfig.binds(getBindings().get());
         containerConfig.setExposedPorts(exposedPorts);
         containerConfig.setHostConfig(hostConfig);
 

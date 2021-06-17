@@ -3,6 +3,8 @@ package com.pits.gradle.plugin.portainer.setting;
 import lombok.Getter;
 import org.gradle.api.Action;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
 /**
@@ -44,5 +46,9 @@ public abstract class PortainerSetting {
   abstract public Property<Boolean> getRemoveOldImages();
 
   abstract public Property<String> getRestartPolicy();
+
+  abstract public MapProperty<String, Object> getVolumes();
+
+  abstract public ListProperty<String> getBindings();
 
 }
