@@ -61,68 +61,68 @@ info:
 host: "portainer.domain"
 basePath: "/api"
 tags:
-- name: "auth"
-  description: "Authenticate against Portainer HTTP API"
-- name: "dockerhub"
-  description: "Manage how Portainer connects to the DockerHub"
-- name: "endpoints"
-  description: "Manage Docker environments"
-- name: "endpoint_groups"
-  description: "Manage endpoint groups"
-- name: "extensions"
-  description: "Manage extensions"
-- name: "registries"
-  description: "Manage Docker registries"
-- name: "resource_controls"
-  description: "Manage access control on Docker resources"
-- name: "roles"
-  description: "Manage roles"
-- name: "settings"
-  description: "Manage Portainer settings"
-- name: "status"
-  description: "Information about the Portainer instance"
-- name: "stacks"
-  description: "Manage Docker stacks"
-- name: "users"
-  description: "Manage users"
-- name: "tags"
-  description: "Manage tags"
-- name: "teams"
-  description: "Manage teams"
-- name: "team_memberships"
-  description: "Manage team memberships"
-- name: "templates"
-  description: "Manage App Templates"
-- name: "stacks"
-  description: "Manage stacks"
-- name: "upload"
-  description: "Upload files"
-- name: "websocket"
-  description: "Create exec sessions using websockets"
+  - name: "auth"
+    description: "Authenticate against Portainer HTTP API"
+  - name: "dockerhub"
+    description: "Manage how Portainer connects to the DockerHub"
+  - name: "endpoints"
+    description: "Manage Docker environments"
+  - name: "endpoint_groups"
+    description: "Manage endpoint groups"
+  - name: "extensions"
+    description: "Manage extensions"
+  - name: "registries"
+    description: "Manage Docker registries"
+  - name: "resource_controls"
+    description: "Manage access control on Docker resources"
+  - name: "roles"
+    description: "Manage roles"
+  - name: "settings"
+    description: "Manage Portainer settings"
+  - name: "status"
+    description: "Information about the Portainer instance"
+  - name: "stacks"
+    description: "Manage Docker stacks"
+  - name: "users"
+    description: "Manage users"
+  - name: "tags"
+    description: "Manage tags"
+  - name: "teams"
+    description: "Manage teams"
+  - name: "team_memberships"
+    description: "Manage team memberships"
+  - name: "templates"
+    description: "Manage App Templates"
+  - name: "stacks"
+    description: "Manage stacks"
+  - name: "upload"
+    description: "Upload files"
+  - name: "websocket"
+    description: "Create exec sessions using websockets"
 schemes:
-- "http"
-- "https"
+  - "http"
+  - "https"
 paths:
   /auth:
     post:
       tags:
-      - "auth"
+        - "auth"
       summary: "Authenticate a user"
       description: |
         Use this endpoint to authenticate against Portainer using a username and password.
         **Access policy**: public
       operationId: "AuthenticateUser"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Credentials used for authentication"
-        required: true
-        schema:
-          $ref: "#/definitions/AuthenticateUserRequest"
+        - in: "body"
+          name: "body"
+          description: "Credentials used for authentication"
+          required: true
+          schema:
+            $ref: "#/definitions/AuthenticateUserRequest"
       responses:
         200:
           description: "Success"
@@ -149,17 +149,17 @@ paths:
   /dockerhub:
     get:
       tags:
-      - "dockerhub"
+        - "dockerhub"
       summary: "Retrieve DockerHub information"
       description: |
         Use this endpoint to retrieve the information used to connect to the DockerHub
         **Access policy**: authenticated
       operationId: "DockerHubInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -171,25 +171,25 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "dockerhub"
+        - "dockerhub"
       summary: "Update DockerHub information"
       description: |
         Use this endpoint to update the information used to connect to the DockerHub
         **Access policy**: administrator
       operationId: "DockerHubUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "DockerHub information"
-        required: true
-        schema:
-          $ref: "#/definitions/DockerHubUpdateRequest"
+        - in: "body"
+          name: "body"
+          description: "DockerHub information"
+          required: true
+          schema:
+            $ref: "#/definitions/DockerHubUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -209,7 +209,7 @@ paths:
   /endpoints:
     get:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "List endpoints"
       description: |
         List all endpoints based on the current user authorizations. Will
@@ -218,10 +218,10 @@ paths:
         **Access policy**: restricted
       operationId: "EndpointList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -233,79 +233,79 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "Create a new endpoint"
       description: |
         Create a new endpoint that will be used to manage a Docker environment.
         **Access policy**: administrator
       operationId: "EndpointCreate"
       consumes:
-      - "multipart/form-data"
+        - "multipart/form-data"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "Name"
-        in: "formData"
-        type: "string"
-        description: "Name that will be used to identify this endpoint (example: my-endpoint)"
-        required: true
-      - name: "EndpointType"
-        in: "formData"
-        type: "integer"
-        description: "Environment type. Value must be one of: 1 (Docker environment), 2 (Agent environment), 3 (Azure environment) or 4 (Edge agent environment)"
-        required: true
-      - name: "URL"
-        in: "formData"
-        type: "string"
-        description: "URL or IP address of a Docker host (example: docker.mydomain.tld:2375).\
+        - name: "Name"
+          in: "formData"
+          type: "string"
+          description: "Name that will be used to identify this endpoint (example: my-endpoint)"
+          required: true
+        - name: "EndpointType"
+          in: "formData"
+          type: "integer"
+          description: "Environment type. Value must be one of: 1 (Docker environment), 2 (Agent environment), 3 (Azure environment) or 4 (Edge agent environment)"
+          required: true
+        - name: "URL"
+          in: "formData"
+          type: "string"
+          description: "URL or IP address of a Docker host (example: docker.mydomain.tld:2375).\
           \ Defaults to local if not specified (Linux: /var/run/docker.sock, Windows: //./pipe/docker_engine)"
-      - name: "PublicURL"
-        in: "formData"
-        type: "string"
-        description: "URL or IP address where exposed containers will be reachable.\
+        - name: "PublicURL"
+          in: "formData"
+          type: "string"
+          description: "URL or IP address where exposed containers will be reachable.\
           \ Defaults to URL if not specified (example: docker.mydomain.tld:2375)"
-      - name: "GroupID"
-        in: "formData"
-        type: "string"
-        description: "Endpoint group identifier. If not specified will default to 1 (unassigned)."
-      - name: "TLS"
-        in: "formData"
-        type: "string"
-        description: "Require TLS to connect against this endpoint (example: true)"
-      - name: "TLSSkipVerify"
-        in: "formData"
-        type: "string"
-        description: "Skip server verification when using TLS (example: false)"
-      - name: "TLSSkipClientVerify"
-        in: "formData"
-        type: "string"
-        description: "Skip client verification when using TLS (example: false)"
-      - name: "TLSCACertFile"
-        in: "formData"
-        type: "file"
-        description: "TLS CA certificate file"
-      - name: "TLSCertFile"
-        in: "formData"
-        type: "file"
-        description: "TLS client certificate file"
-      - name: "TLSKeyFile"
-        in: "formData"
-        type: "file"
-        description: "TLS client key file"
-      - name: "AzureApplicationID"
-        in: "formData"
-        type: "string"
-        description: "Azure application ID. Required if endpoint type is set to 3"
-      - name: "AzureTenantID"
-        in: "formData"
-        type: "string"
-        description: "Azure tenant ID. Required if endpoint type is set to 3"
-      - name: "AzureAuthenticationKey"
-        in: "formData"
-        type: "string"
-        description: "Azure authentication key. Required if endpoint type is set to 3"
+        - name: "GroupID"
+          in: "formData"
+          type: "string"
+          description: "Endpoint group identifier. If not specified will default to 1 (unassigned)."
+        - name: "TLS"
+          in: "formData"
+          type: "string"
+          description: "Require TLS to connect against this endpoint (example: true)"
+        - name: "TLSSkipVerify"
+          in: "formData"
+          type: "string"
+          description: "Skip server verification when using TLS (example: false)"
+        - name: "TLSSkipClientVerify"
+          in: "formData"
+          type: "string"
+          description: "Skip client verification when using TLS (example: false)"
+        - name: "TLSCACertFile"
+          in: "formData"
+          type: "file"
+          description: "TLS CA certificate file"
+        - name: "TLSCertFile"
+          in: "formData"
+          type: "file"
+          description: "TLS client certificate file"
+        - name: "TLSKeyFile"
+          in: "formData"
+          type: "file"
+          description: "TLS client key file"
+        - name: "AzureApplicationID"
+          in: "formData"
+          type: "string"
+          description: "Azure application ID. Required if endpoint type is set to 3"
+        - name: "AzureTenantID"
+          in: "formData"
+          type: "string"
+          description: "Azure tenant ID. Required if endpoint type is set to 3"
+        - name: "AzureAuthenticationKey"
+          in: "formData"
+          type: "string"
+          description: "Azure authentication key. Required if endpoint type is set to 3"
       responses:
         200:
           description: "Success"
@@ -541,22 +541,22 @@ paths:
   /endpoints/{id}:
     get:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "Inspect an endpoint"
       description: |
         Retrieve details abount an endpoint.
         **Access policy**: restricted
       operationId: "EndpointInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -582,30 +582,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "Update an endpoint"
       description: |
         Update an endpoint.
         **Access policy**: administrator
       operationId: "EndpointUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Endpoint details"
-        required: true
-        schema:
-          $ref: "#/definitions/EndpointUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Endpoint details"
+          required: true
+          schema:
+            $ref: "#/definitions/EndpointUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -636,20 +636,20 @@ paths:
               err: "Endpoint management is disabled"
     delete:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "Remove an endpoint"
       description: |
         Remove an endpoint.
         **Access policy**: administrator
       operationId: "EndpointDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -681,48 +681,48 @@ paths:
   /endpoints/{id}/job:
     post:
       tags:
-      - "endpoints"
+        - "endpoints"
       summary: "Execute a job on the endpoint host"
       description: |
         Execute a job (script) on the underlying host of the endpoint.
         **Access policy**: administrator
       operationId: "EndpointJob"
       consumes:
-      - "multipart/form-data"
+        - "multipart/form-data"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
-      - name: "method"
-        in: "query"
-        description: "Job execution method. Possible values: file or string."
-        required: true
-        type: "string"
-      - name: "nodeName"
-        in: "query"
-        description: "Optional. Hostname of a node when targeting a Portainer agent cluster."
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "Job details. Required when method equals string."
-        required: true
-        schema:
-          $ref: "#/definitions/EndpointJobRequest"
-      - name: "Image"
-        in: "formData"
-        type: "string"
-        description: "Container image which will be used to execute the job. Required when method equals file."
-      - name: "file"
-        in: "formData"
-        type: "file"
-        description: "Job script file. Required when method equals file."
+        - name: "id"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
+        - name: "method"
+          in: "query"
+          description: "Job execution method. Possible values: file or string."
+          required: true
+          type: "string"
+        - name: "nodeName"
+          in: "query"
+          description: "Optional. Hostname of a node when targeting a Portainer agent cluster."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Job details. Required when method equals string."
+          required: true
+          schema:
+            $ref: "#/definitions/EndpointJobRequest"
+        - name: "Image"
+          in: "formData"
+          type: "string"
+          description: "Container image which will be used to execute the job. Required when method equals file."
+        - name: "file"
+          in: "formData"
+          type: "file"
+          description: "Job script file. Required when method equals file."
       responses:
         200:
           description: "Success"
@@ -753,7 +753,7 @@ paths:
   /endpoint_groups:
     get:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "List endpoint groups"
       description: |
         List all endpoint groups based on the current user authorizations. Will
@@ -762,10 +762,10 @@ paths:
         **Access policy**: restricted
       operationId: "EndpointGroupList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -777,25 +777,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Create a new endpoint"
       description: |
         Create a new endpoint group.
         **Access policy**: administrator
       operationId: "EndpointGroupCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Registry details"
-        required: true
-        schema:
-          $ref: "#/definitions/EndpointGroupCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Registry details"
+          required: true
+          schema:
+            $ref: "#/definitions/EndpointGroupCreateRequest"
       responses:
         200:
           description: "Success"
@@ -815,22 +815,22 @@ paths:
   /endpoint_groups/{id}:
     get:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Inspect an endpoint group"
       description: |
         Retrieve details abount an endpoint group.
         **Access policy**: administrator
       operationId: "EndpointGroupInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Endpoint group identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Endpoint group identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -856,30 +856,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Update an endpoint group"
       description: |
         Update an endpoint group.
         **Access policy**: administrator
       operationId: "EndpointGroupUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "EndpointGroup identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "EndpointGroup details"
-        required: true
-        schema:
-          $ref: "#/definitions/EndpointGroupUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "EndpointGroup identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "EndpointGroup details"
+          required: true
+          schema:
+            $ref: "#/definitions/EndpointGroupUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -912,20 +912,20 @@ paths:
               err: "EndpointGroup management is disabled"
     delete:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Remove an endpoint group"
       description: |
         Remove an endpoint group.
         **Access policy**: administrator
       operationId: "EndpointGroupDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "EndpointGroup identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "EndpointGroup identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -957,29 +957,29 @@ paths:
   /endpoint_groups/{id}/endpoints/{endpointId}:
     put:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Add an endpoint to an endpoint group"
       description: |
         Add an endpoint to an endpoint group
         **Access policy**: administrator
       operationId: "EndpointGroupAddEndpoint"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "EndpointGroup identifier"
-        required: true
-        type: "integer"
-      - name: "endpointId"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "EndpointGroup identifier"
+          required: true
+          type: "integer"
+        - name: "endpointId"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -1003,25 +1003,25 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "endpoint_groups"
+        - "endpoint_groups"
       summary: "Remove an endpoint group"
       description: |
         Remove an endpoint group.
         **Access policy**: administrator
       operationId: "EndpointGroupDeleteEndpoint"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "EndpointGroup identifier"
-        required: true
-        type: "integer"
-      - name: "endpointId"
-        in: "path"
-        description: "Endpoint identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "EndpointGroup identifier"
+          required: true
+          type: "integer"
+        - name: "endpointId"
+          in: "path"
+          description: "Endpoint identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -1046,7 +1046,7 @@ paths:
   /extensions:
     get:
       tags:
-      - "extensions"
+        - "extensions"
       summary: "List extensions"
       description: |
         List all extensions registered inside Portainer. If the store parameter is set to true,
@@ -1054,15 +1054,15 @@ paths:
         **Access policy**: administrator
       operationId: "ExtensionList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "store"
-        in: "query"
-        description: "Retrieve online information about extensions. Possible values: true or false."
-        required: false
-        type: "boolean"
+        - name: "store"
+          in: "query"
+          description: "Retrieve online information about extensions. Possible values: true or false."
+          required: false
+          type: "boolean"
       responses:
         200:
           description: "Success"
@@ -1074,25 +1074,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "extensions"
+        - "extensions"
       summary: "Enable an extension"
       description: |
         Enable an extension.
         **Access policy**: administrator
       operationId: "ExtensionCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Extension details"
-        required: true
-        schema:
-          $ref: "#/definitions/ExtensionCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Extension details"
+          required: true
+          schema:
+            $ref: "#/definitions/ExtensionCreateRequest"
       responses:
         204:
           description: "Success"
@@ -1110,22 +1110,22 @@ paths:
   /extensions/{id}:
     get:
       tags:
-      - "extensions"
+        - "extensions"
       summary: "Inspect an extension"
       description: |
         Retrieve details abount an extension.
         **Access policy**: administrator
       operationId: "ExtensionInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "extension identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "extension identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -1151,30 +1151,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "extensions"
+        - "extensions"
       summary: "Update an extension"
       description: |
         Update an extension to a specific version of the extension.
         **Access policy**: administrator
       operationId: "ExtensionUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Extension identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Extension details"
-        required: true
-        schema:
-          $ref: "#/definitions/ExtensionUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Extension identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Extension details"
+          required: true
+          schema:
+            $ref: "#/definitions/ExtensionUpdateRequest"
       responses:
         204:
           description: "Success"
@@ -1198,20 +1198,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "extensions"
+        - "extensions"
       summary: "Disable an extension"
       description: |
         Disable an extension.
         **Access policy**: administrator
       operationId: "ExtensionDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Extension identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Extension identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -1236,7 +1236,7 @@ paths:
   /registries:
     get:
       tags:
-      - "registries"
+        - "registries"
       summary: "List registries"
       description: |
         List all registries based on the current user authorizations.
@@ -1245,10 +1245,10 @@ paths:
         **Access policy**: restricted
       operationId: "RegistryList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -1260,25 +1260,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "registries"
+        - "registries"
       summary: "Create a new registry"
       description: |
         Create a new registry.
         **Access policy**: administrator
       operationId: "RegistryCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Registry details"
-        required: true
-        schema:
-          $ref: "#/definitions/RegistryCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Registry details"
+          required: true
+          schema:
+            $ref: "#/definitions/RegistryCreateRequest"
       responses:
         200:
           description: "Success"
@@ -1305,22 +1305,22 @@ paths:
   /registries/{id}:
     get:
       tags:
-      - "registries"
+        - "registries"
       summary: "Inspect a registry"
       description: |
         Retrieve details about a registry.
         **Access policy**: administrator
       operationId: "RegistryInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Registry identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Registry identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -1346,30 +1346,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "registries"
+        - "registries"
       summary: "Update a registry"
       description: |
         Update a registry.
         **Access policy**: administrator
       operationId: "RegistryUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Registry identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Registry details"
-        required: true
-        schema:
-          $ref: "#/definitions/RegistryUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Registry identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Registry details"
+          required: true
+          schema:
+            $ref: "#/definitions/RegistryUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -1402,20 +1402,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "registries"
+        - "registries"
       summary: "Remove a registry"
       description: |
         Remove a registry.
         **Access policy**: administrator
       operationId: "RegistryDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Registry identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Registry identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -1440,25 +1440,25 @@ paths:
   /resource_controls:
     post:
       tags:
-      - "resource_controls"
+        - "resource_controls"
       summary: "Create a new resource control"
       description: |
         Create a new resource control to restrict access to a Docker resource.
         **Access policy**: administrator
       operationId: "ResourceControlCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Resource control details"
-        required: true
-        schema:
-          $ref: "#/definitions/ResourceControlCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Resource control details"
+          required: true
+          schema:
+            $ref: "#/definitions/ResourceControlCreateRequest"
       responses:
         200:
           description: "Success"
@@ -1492,30 +1492,30 @@ paths:
   /resource_controls/{id}:
     put:
       tags:
-      - "resource_controls"
+        - "resource_controls"
       summary: "Update a resource control"
       description: |
         Update a resource control.
         **Access policy**: restricted
       operationId: "ResourceControlUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Resource control identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Resource control details"
-        required: true
-        schema:
-          $ref: "#/definitions/ResourceControlUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Resource control identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Resource control details"
+          required: true
+          schema:
+            $ref: "#/definitions/ResourceControlUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -1548,20 +1548,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "resource_controls"
+        - "resource_controls"
       summary: "Remove a resource control"
       description: |
         Remove a resource control.
         **Access policy**: administrator
       operationId: "ResourceControlDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Resource control identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Resource control identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -1593,17 +1593,17 @@ paths:
   /roles:
     get:
       tags:
-      - "roles"
+        - "roles"
       summary: "List roles"
       description: |
         List all roles available for use with the RBAC extension.
         **Access policy**: administrator
       operationId: "RoleList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -1616,17 +1616,17 @@ paths:
   /settings:
     get:
       tags:
-      - "settings"
+        - "settings"
       summary: "Retrieve Portainer settings"
       description: |
         Retrieve Portainer settings.
         **Access policy**: administrator
       operationId: "SettingsInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -1638,25 +1638,25 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "settings"
+        - "settings"
       summary: "Update Portainer settings"
       description: |
         Update Portainer settings.
         **Access policy**: administrator
       operationId: "SettingsUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "New settings"
-        required: true
-        schema:
-          $ref: "#/definitions/SettingsUpdateRequest"
+        - in: "body"
+          name: "body"
+          description: "New settings"
+          required: true
+          schema:
+            $ref: "#/definitions/SettingsUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -1676,17 +1676,17 @@ paths:
   /settings/public:
     get:
       tags:
-      - "settings"
+        - "settings"
       summary: "Retrieve Portainer public settings"
       description: |
         Retrieve public settings. Returns a small set of settings that are not reserved to administrators only.
         **Access policy**: public
       operationId: "PublicSettingsInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -1699,25 +1699,25 @@ paths:
   /settings/authentication/checkLDAP:
     put:
       tags:
-      - "settings"
+        - "settings"
       summary: "Test LDAP connectivity"
       description: |
         Test LDAP connectivity using LDAP details.
         **Access policy**: administrator
       operationId: "SettingsLDAPCheck"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "LDAP settings"
-        required: true
-        schema:
-          $ref: "#/definitions/SettingsLDAPCheckRequest"
+        - in: "body"
+          name: "body"
+          description: "LDAP settings"
+          required: true
+          schema:
+            $ref: "#/definitions/SettingsLDAPCheckRequest"
       responses:
         204:
           description: "Success"
@@ -1735,17 +1735,17 @@ paths:
   /status:
     get:
       tags:
-      - "status"
+        - "status"
       summary: "Check Portainer status"
       description: |
         Retrieve Portainer status.
         **Access policy**: public
       operationId: "StatusInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -1758,7 +1758,7 @@ paths:
   /stacks:
     get:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "List stacks"
       description: |
         List all stacks based on the current user authorizations.
@@ -1767,17 +1767,17 @@ paths:
         **Access policy**: restricted
       operationId: "StackList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "filters"
-        in: "query"
-        description: |
-          Filters to process on the stack list. Encoded as JSON (a map[string]string).
-          For example, {"SwarmID": "jpofkc0i9uo9wtx1zesuk649w"} will only return stacks that are part
-          of the specified Swarm cluster. Available filters: EndpointID, SwarmID.
-        type: "string"
+        - name: "filters"
+          in: "query"
+          description: |
+            Filters to process on the stack list. Encoded as JSON (a map[string]string).
+            For example, {"SwarmID": "jpofkc0i9uo9wtx1zesuk649w"} will only return stacks that are part
+            of the specified Swarm cluster. Available filters: EndpointID, SwarmID.
+          type: "string"
       responses:
         200:
           description: "Success"
@@ -1792,59 +1792,59 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Deploy a new stack"
       description: |
         Deploy a new stack into a Docker environment specified via the endpoint identifier.
         **Access policy**: restricted
       operationId: "StackCreate"
       consumes:
-      - "multipart/form-data"
+        - "multipart/form-data"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "type"
-        in: "query"
-        description: "Stack deployment type. Possible values: 1 (Swarm stack) or 2 (Compose stack)."
-        required: true
-        type: "integer"
-      - name: "method"
-        in: "query"
-        description: "Stack deployment method. Possible values: file, string or repository."
-        required: true
-        type: "string"
-      - name: "endpointId"
-        in: "query"
-        description: "Identifier of the endpoint that will be used to deploy the stack."
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Stack details. Required when method equals string or repository."
-        schema:
-          $ref: "#/definitions/StackCreateRequest"
-      - name: "Name"
-        in: "formData"
-        type: "string"
-        description: "Name of the stack. Required when method equals file."
-      - name: "EndpointID"
-        in: "formData"
-        type: "string"
-        description: "Endpoint identifier used to deploy the stack. Required when method equals file."
-      - name: "SwarmID"
-        in: "formData"
-        type: "string"
-        description: "Swarm cluster identifier. Required when method equals file and type equals 1."
-      - name: "file"
-        in: "formData"
-        type: "file"
-        description: "Stack file. Required when method equals file."
-      - name: "Env"
-        in: "formData"
-        type: "string"
-        description: "Environment variables passed during deployment, represented as a JSON array [{'name': 'name', 'value': 'value'}]. Optional, used when method equals file and type equals 1."
+        - name: "type"
+          in: "query"
+          description: "Stack deployment type. Possible values: 1 (Swarm stack) or 2 (Compose stack)."
+          required: true
+          type: "integer"
+        - name: "method"
+          in: "query"
+          description: "Stack deployment method. Possible values: file, string or repository."
+          required: true
+          type: "string"
+        - name: "endpointId"
+          in: "query"
+          description: "Identifier of the endpoint that will be used to deploy the stack."
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Stack details. Required when method equals string or repository."
+          schema:
+            $ref: "#/definitions/StackCreateRequest"
+        - name: "Name"
+          in: "formData"
+          type: "string"
+          description: "Name of the stack. Required when method equals file."
+        - name: "EndpointID"
+          in: "formData"
+          type: "string"
+          description: "Endpoint identifier used to deploy the stack. Required when method equals file."
+        - name: "SwarmID"
+          in: "formData"
+          type: "string"
+          description: "Swarm cluster identifier. Required when method equals file and type equals 1."
+        - name: "file"
+          in: "formData"
+          type: "file"
+          description: "Stack file. Required when method equals file."
+        - name: "Env"
+          in: "formData"
+          type: "string"
+          description: "Environment variables passed during deployment, represented as a JSON array [{'name': 'name', 'value': 'value'}]. Optional, used when method equals file and type equals 1."
       responses:
         200:
           description: "Success"
@@ -1875,22 +1875,22 @@ paths:
   /stacks/{id}:
     get:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Inspect a stack"
       description: |
         Retrieve details about a stack.
         **Access policy**: restricted
       operationId: "StackInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Stack identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Stack identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -1920,35 +1920,35 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Update a stack"
       description: |
         Update a stack.
         **Access policy**: restricted
       operationId: "StackUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Stack identifier"
-        required: true
-        type: "integer"
-      - name: "endpointId"
-        in: "query"
-        description: "Stacks created before version 1.18.0 might not have an associated endpoint identifier. Use this \
+        - name: "id"
+          in: "path"
+          description: "Stack identifier"
+          required: true
+          type: "integer"
+        - name: "endpointId"
+          in: "query"
+          description: "Stacks created before version 1.18.0 might not have an associated endpoint identifier. Use this \
         optional parameter to set the endpoint identifier used by the stack."
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Stack details"
-        required: true
-        schema:
-          $ref: "#/definitions/StackUpdateRequest"
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Stack details"
+          required: true
+          schema:
+            $ref: "#/definitions/StackUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -1978,28 +1978,28 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Remove a stack"
       description: |
         Remove a stack.
         **Access policy**: restricted
       operationId: "StackDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Stack identifier"
-        required: true
-        type: "integer"
-      - name: "external"
-        in: "query"
-        description: "Set to true to delete an external stack. Only external Swarm stacks are supported."
-        type: "boolean"
-      - name: "endpointId"
-        in: "query"
-        description: "Endpoint identifier used to remove an external stack (required when external is set to true)"
-        type: "string"
+        - name: "id"
+          in: "path"
+          description: "Stack identifier"
+          required: true
+          type: "integer"
+        - name: "external"
+          in: "query"
+          description: "Set to true to delete an external stack. Only external Swarm stacks are supported."
+          type: "boolean"
+        - name: "endpointId"
+          in: "query"
+          description: "Endpoint identifier used to remove an external stack (required when external is set to true)"
+          type: "string"
       responses:
         204:
           description: "Success"
@@ -2028,22 +2028,22 @@ paths:
   /stacks/{id}/file:
     get:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Retrieve the content of the Stack file for the specified stack"
       description: |
         Get Stack file content.
         **Access policy**: restricted
       operationId: "StackFileInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Stack identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Stack identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -2074,7 +2074,7 @@ paths:
   /stacks/{id}/migrate:
     post:
       tags:
-      - "stacks"
+        - "stacks"
       summary: "Migrate a stack to another endpoint"
       description: |
         Migrate a stack from an endpoint to another endpoint. It will re-create
@@ -2082,25 +2082,25 @@ paths:
         **Access policy**: restricted
       operationId: "StackMigrate"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Stack identifier"
-        required: true
-        type: "integer"
-      - name: "endpointId"
-        in: "query"
-        description: "Stacks created before version 1.18.0 might not have an associated endpoint identifier. Use this \
+        - name: "id"
+          in: "path"
+          description: "Stack identifier"
+          required: true
+          type: "integer"
+        - name: "endpointId"
+          in: "query"
+          description: "Stacks created before version 1.18.0 might not have an associated endpoint identifier. Use this \
         optional parameter to set the endpoint identifier used by the stack."
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Stack migration details."
-        schema:
-          $ref: "#/definitions/StackMigrateRequest"
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Stack migration details."
+          schema:
+            $ref: "#/definitions/StackMigrateRequest"
       responses:
         200:
           description: "Success"
@@ -2131,17 +2131,17 @@ paths:
   /users:
     get:
       tags:
-      - "users"
+        - "users"
       summary: "List users"
       description: |
         List Portainer users. Non-administrator users will only be able to list other non-administrator user accounts.
         **Access policy**: restricted
       operationId: "UserList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -2153,7 +2153,7 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "users"
+        - "users"
       summary: "Create a new user"
       description: |
         Create a new Portainer user. Only team leaders and administrators can create users. Only administrators can
@@ -2161,18 +2161,18 @@ paths:
         **Access policy**: restricted
       operationId: "UserCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "User details"
-        required: true
-        schema:
-          $ref: "#/definitions/UserCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "User details"
+          required: true
+          schema:
+            $ref: "#/definitions/UserCreateRequest"
       responses:
         200:
           description: "Success"
@@ -2206,22 +2206,22 @@ paths:
   /users/{id}:
     get:
       tags:
-      - "users"
+        - "users"
       summary: "Inspect a user"
       description: |
         Retrieve details about a user.
         **Access policy**: administrator
       operationId: "UserInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "User identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "User identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -2247,30 +2247,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "users"
+        - "users"
       summary: "Update a user"
       description: |
         Update user details. A regular user account can only update his details.
         **Access policy**: authenticated
       operationId: "UserUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "User identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "User details"
-        required: true
-        schema:
-          $ref: "#/definitions/UserUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "User identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "User details"
+          required: true
+          schema:
+            $ref: "#/definitions/UserUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -2303,20 +2303,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "users"
+        - "users"
       summary: "Remove a user"
       description: |
         Remove a user.
         **Access policy**: administrator
       operationId: "UserDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "User identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "User identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -2341,22 +2341,22 @@ paths:
   /users/{id}/memberships:
     get:
       tags:
-      - "users"
+        - "users"
       summary: "Inspect a user memberships"
       description: |
         Inspect a user memberships.
         **Access policy**: authenticated
       operationId: "UserMembershipsInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "User identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "User identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -2384,30 +2384,30 @@ paths:
   /users/{id}/passwd:
     post:
       tags:
-      - "users"
+        - "users"
       summary: "Check password validity for a user"
       description: |
         Check if the submitted password is valid for the specified user.
         **Access policy**: authenticated
       operationId: "UserPasswordCheck"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "User identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "User details"
-        required: true
-        schema:
-          $ref: "#/definitions/UserPasswordCheckRequest"
+        - name: "id"
+          in: "path"
+          description: "User identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "User details"
+          required: true
+          schema:
+            $ref: "#/definitions/UserPasswordCheckRequest"
       responses:
         200:
           description: "Success"
@@ -2435,17 +2435,17 @@ paths:
   /users/admin/check:
     get:
       tags:
-      - "users"
+        - "users"
       summary: "Check administrator account existence"
       description: |
         Check if an administrator account exists in the database.
         **Access policy**: public
       operationId: "UserAdminCheck"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         204:
           description: "Success"
@@ -2464,25 +2464,25 @@ paths:
   /users/admin/init:
     post:
       tags:
-      - "users"
+        - "users"
       summary: "Initialize administrator account"
       description: |
         Initialize the 'admin' user account.
         **Access policy**: public
       operationId: "UserAdminInit"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "User details"
-        required: true
-        schema:
-          $ref: "#/definitions/UserAdminInitRequest"
+        - in: "body"
+          name: "body"
+          description: "User details"
+          required: true
+          schema:
+            $ref: "#/definitions/UserAdminInitRequest"
       responses:
         200:
           description: "Success"
@@ -2510,33 +2510,33 @@ paths:
   /upload/tls/{certificate}:
     post:
       tags:
-      - "upload"
+        - "upload"
       summary: "Upload TLS files"
       description: |
         Use this endpoint to upload TLS files.
         **Access policy**: administrator
       operationId: "UploadTLS"
       consumes:
-      - multipart/form-data
+        - multipart/form-data
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "path"
-        name: "certificate"
-        description: "TLS file type. Valid values are 'ca', 'cert' or 'key'."
-        required: true
-        type: "string"
-      - in: "query"
-        name: "folder"
-        description: "Folder where the TLS file will be stored. Will be created if not existing."
-        required: true
-        type: "string"
-      - in: "formData"
-        name: "file"
-        type: "file"
-        description: "The file to upload."
+        - in: "path"
+          name: "certificate"
+          description: "TLS file type. Valid values are 'ca', 'cert' or 'key'."
+          required: true
+          type: "string"
+        - in: "query"
+          name: "folder"
+          description: "Folder where the TLS file will be stored. Will be created if not existing."
+          required: true
+          type: "string"
+        - in: "formData"
+          name: "file"
+          type: "file"
+          description: "The file to upload."
       responses:
         200:
           description: "Success"
@@ -2555,17 +2555,17 @@ paths:
   /tags:
     get:
       tags:
-      - "tags"
+        - "tags"
       summary: "List tags"
       description: |
         List tags.
         **Access policy**: administrator
       operationId: "TagList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -2577,25 +2577,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "tags"
+        - "tags"
       summary: "Create a new tag"
       description: |
         Create a new tag.
         **Access policy**: administrator
       operationId: "TagCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Tag details"
-        required: true
-        schema:
-          $ref: "#/definitions/TagCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Tag details"
+          required: true
+          schema:
+            $ref: "#/definitions/TagCreateRequest"
       responses:
         200:
           description: "Success"
@@ -2622,20 +2622,20 @@ paths:
   /tags/{id}:
     delete:
       tags:
-      - "tags"
+        - "tags"
       summary: "Remove a tag"
       description: |
         Remove a tag.
         **Access policy**: administrator
       operationId: "TagDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Tag identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Tag identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -2654,17 +2654,17 @@ paths:
   /teams:
     get:
       tags:
-      - "teams"
+        - "teams"
       summary: "List teams"
       description: |
         List teams. For non-administrator users, will only list the teams they are member of.
         **Access policy**: restricted
       operationId: "TeamList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -2676,25 +2676,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "teams"
+        - "teams"
       summary: "Create a new team"
       description: |
         Create a new team.
         **Access policy**: administrator
       operationId: "TeamCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Team details"
-        required: true
-        schema:
-          $ref: "#/definitions/TeamCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Team details"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamCreateRequest"
       responses:
         200:
           description: "Success"
@@ -2728,22 +2728,22 @@ paths:
   /teams/{id}:
     get:
       tags:
-      - "teams"
+        - "teams"
       summary: "Inspect a team"
       description: |
         Retrieve details about a team. Access is only available for administrator and leaders of that team.
         **Access policy**: restricted
       operationId: "TeamInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Team identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Team identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -2776,30 +2776,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "teams"
+        - "teams"
       summary: "Update a team"
       description: |
         Update a team.
         **Access policy**: administrator
       operationId: "TeamUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Team identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Team details"
-        required: true
-        schema:
-          $ref: "#/definitions/TeamUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Team identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Team details"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -2823,20 +2823,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "teams"
+        - "teams"
       summary: "Remove a team"
       description: |
         Remove a team.
         **Access policy**: administrator
       operationId: "TeamDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Team identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Team identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -2862,22 +2862,22 @@ paths:
   /teams/{id}/memberships:
     get:
       tags:
-      - "teams"
+        - "teams"
       summary: "Inspect a team memberships"
       description: |
         Inspect a team memberships. Access is only available for administrator and leaders of that team.
         **Access policy**: restricted
       operationId: "TeamMembershipsInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Team identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Team identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -2905,17 +2905,17 @@ paths:
   /team_memberships:
     get:
       tags:
-      - "team_memberships"
+        - "team_memberships"
       summary: "List team memberships"
       description: |
         List team memberships. Access is only available to administrators and team leaders.
         **Access policy**: restricted
       operationId: "TeamMembershipList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -2934,25 +2934,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "team_memberships"
+        - "team_memberships"
       summary: "Create a new team membership"
       description: |
         Create a new team memberships. Access is only available to administrators leaders of the associated team.
         **Access policy**: restricted
       operationId: "TeamMembershipCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Team membership details"
-        required: true
-        schema:
-          $ref: "#/definitions/TeamMembershipCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Team membership details"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamMembershipCreateRequest"
       responses:
         200:
           description: "Success"
@@ -2986,30 +2986,30 @@ paths:
   /team_memberships/{id}:
     put:
       tags:
-      - "team_memberships"
+        - "team_memberships"
       summary: "Update a team membership"
       description: |
         Update a team membership. Access is only available to administrators leaders of the associated team.
         **Access policy**: restricted
       operationId: "TeamMembershipUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Team membership identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Team membership details"
-        required: true
-        schema:
-          $ref: "#/definitions/TeamMembershipUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Team membership identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Team membership details"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamMembershipUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -3042,20 +3042,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "team_memberships"
+        - "team_memberships"
       summary: "Remove a team membership"
       description: |
         Remove a team membership. Access is only available to administrators leaders of the associated team.
         **Access policy**: restricted
       operationId: "TeamMembershipDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "TeamMembership identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "TeamMembership identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -3087,7 +3087,7 @@ paths:
   /templates:
     get:
       tags:
-      - "templates"
+        - "templates"
       summary: "List available templates"
       description: |
         List available templates.
@@ -3095,10 +3095,10 @@ paths:
         **Access policy**: restricted
       operationId: "TemplateList"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
-      parameters: []
+        - jwt: [ ]
+      parameters: [ ]
       responses:
         200:
           description: "Success"
@@ -3110,25 +3110,25 @@ paths:
             $ref: "#/definitions/GenericError"
     post:
       tags:
-      - "templates"
+        - "templates"
       summary: "Create a new template"
       description: |
         Create a new template.
         **Access policy**: administrator
       operationId: "TemplateCreate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Template details"
-        required: true
-        schema:
-          $ref: "#/definitions/TemplateCreateRequest"
+        - in: "body"
+          name: "body"
+          description: "Template details"
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateCreateRequest"
       responses:
         200:
           description: "Success"
@@ -3155,22 +3155,22 @@ paths:
   /templates/{id}:
     get:
       tags:
-      - "templates"
+        - "templates"
       summary: "Inspect a template"
       description: |
         Retrieve details about a template.
         **Access policy**: administrator
       operationId: "TemplateInspect"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Template identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Template identifier"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -3203,30 +3203,30 @@ paths:
             $ref: "#/definitions/GenericError"
     put:
       tags:
-      - "templates"
+        - "templates"
       summary: "Update a template"
       description: |
         Update a template.
         **Access policy**: administrator
       operationId: "TemplateUpdate"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/json"
+        - "application/json"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Template identifier"
-        required: true
-        type: "integer"
-      - in: "body"
-        name: "body"
-        description: "Template details"
-        required: true
-        schema:
-          $ref: "#/definitions/TemplateUpdateRequest"
+        - name: "id"
+          in: "path"
+          description: "Template identifier"
+          required: true
+          type: "integer"
+        - in: "body"
+          name: "body"
+          description: "Template details"
+          required: true
+          schema:
+            $ref: "#/definitions/TemplateUpdateRequest"
       responses:
         200:
           description: "Success"
@@ -3257,20 +3257,20 @@ paths:
             $ref: "#/definitions/GenericError"
     delete:
       tags:
-      - "templates"
+        - "templates"
       summary: "Remove a template"
       description: |
         Remove a template.
         **Access policy**: administrator
       operationId: "TemplateDelete"
       security:
-      - jwt: []
+        - jwt: [ ]
       parameters:
-      - name: "id"
-        in: "path"
-        description: "Template identifier"
-        required: true
-        type: "integer"
+        - name: "id"
+          in: "path"
+          description: "Template identifier"
+          required: true
+          type: "integer"
       responses:
         204:
           description: "Success"
@@ -3306,7 +3306,7 @@ definitions:
   Port:
     type: "object"
     description: "An open port on a container"
-    required: [PrivatePort, Type]
+    required: [ PrivatePort, Type ]
     properties:
       IP:
         type: "string"
@@ -3324,7 +3324,7 @@ definitions:
       Type:
         type: "string"
         x-nullable: false
-        enum: ["tcp", "udp", "sctp"]
+        enum: [ "tcp", "udp", "sctp" ]
     example:
       PrivatePort: 8080
       PublicPort: 80
@@ -4036,8 +4036,8 @@ definitions:
   AuthenticateUserRequest:
     type: "object"
     required:
-    - "Password"
-    - "Username"
+      - "Password"
+      - "Username"
     properties:
       Username:
         type: "string"
@@ -4088,6 +4088,10 @@ definitions:
         example: "617c5f22bb9b023d6daab7cba43a57576f83492867bc767d1c59416b065e5f08"
         description: "Docker resource identifier on which access control will be applied.\
           \ In the case of a resource control applied to a stack, use the stack name as identifier"
+      Id:
+        type: integer
+        example: 1
+        description: ResourceControl Identifier
       Type:
         type: "string"
         example: "container"
@@ -4121,9 +4125,9 @@ definitions:
   DockerHubUpdateRequest:
     type: "object"
     required:
-    - "Authentication"
-    - "Password"
-    - "Username"
+      - "Authentication"
+      - "Password"
+      - "Username"
     properties:
       Authentication:
         type: "boolean"
@@ -4196,12 +4200,12 @@ definitions:
   RegistryCreateRequest:
     type: "object"
     required:
-    - "Authentication"
-    - "Name"
-    - "Password"
-    - "Type"
-    - "URL"
-    - "Username"
+      - "Authentication"
+      - "Name"
+      - "Password"
+      - "Type"
+      - "URL"
+      - "Username"
     properties:
       Name:
         type: "string"
@@ -4234,8 +4238,8 @@ definitions:
   RegistryUpdateRequest:
     type: "object"
     required:
-    - "Name"
-    - "URL"
+      - "Name"
+      - "URL"
     properties:
       Name:
         type: "string"
@@ -4264,8 +4268,8 @@ definitions:
   ResourceControlCreateRequest:
     type: "object"
     required:
-    - "ResourceID"
-    - "Type"
+      - "ResourceID"
+      - "Type"
     properties:
       ResourceID:
         type: "string"
@@ -4326,8 +4330,8 @@ definitions:
   SettingsUpdateRequest:
     type: "object"
     required:
-    - "TemplatesURL"
-    - "AuthenticationMethod"
+      - "TemplatesURL"
+      - "AuthenticationMethod"
     properties:
       TemplatesURL:
         type: "string"
@@ -4372,7 +4376,7 @@ definitions:
   EndpointGroupCreateRequest:
     type: "object"
     required:
-    - "Name"
+      - "Name"
     properties:
       Name:
         type: "string"
@@ -4418,9 +4422,9 @@ definitions:
   UserCreateRequest:
     type: "object"
     required:
-    - "Password"
-    - "Role"
-    - "Username"
+      - "Password"
+      - "Role"
+      - "Username"
     properties:
       Username:
         type: "string"
@@ -4456,7 +4460,7 @@ definitions:
   UserPasswordCheckRequest:
     type: "object"
     required:
-    - "Password"
+      - "Password"
     properties:
       Password:
         type: "string"
@@ -4476,7 +4480,7 @@ definitions:
   TagCreateRequest:
     type: "object"
     required:
-    - "Name"
+      - "Name"
     properties:
       Name:
         type: "string"
@@ -4485,7 +4489,7 @@ definitions:
   TeamCreateRequest:
     type: "object"
     required:
-    - "Name"
+      - "Name"
     properties:
       Name:
         type: "string"
@@ -4498,7 +4502,7 @@ definitions:
   TeamUpdateRequest:
     type: "object"
     required:
-    - "Name"
+      - "Name"
     properties:
       Name:
         type: "string"
@@ -4512,9 +4516,9 @@ definitions:
   TeamMembershipCreateRequest:
     type: "object"
     required:
-    - "UserID"
-    - "TeamID"
-    - "Role"
+      - "UserID"
+      - "TeamID"
+      - "Role"
     properties:
       UserID:
         type: "integer"
@@ -4535,9 +4539,9 @@ definitions:
   TeamMembershipUpdateRequest:
     type: "object"
     required:
-    - "UserID"
-    - "TeamID"
-    - "Role"
+      - "UserID"
+      - "TeamID"
+      - "Role"
     properties:
       UserID:
         type: "integer"
@@ -4574,9 +4578,9 @@ definitions:
   TemplateCreateRequest:
     type: "object"
     required:
-    - "type"
-    - "title"
-    - "description"
+      - "type"
+      - "title"
+      - "description"
     properties:
       type:
         type: "integer"
@@ -4928,7 +4932,7 @@ definitions:
   TemplateRepository:
     type: "object"
     required:
-    - "URL"
+      - "URL"
     properties:
       URL:
         type: "string"
@@ -4941,7 +4945,7 @@ definitions:
   StackMigrateRequest:
     type: "object"
     required:
-    - "EndpointID"
+      - "EndpointID"
     properties:
       EndpointID:
         type: "integer"
@@ -4958,8 +4962,8 @@ definitions:
   EndpointJobRequest:
     type: "object"
     required:
-    - "Image"
-    - "FileContent"
+      - "Image"
+      - "FileContent"
     properties:
       Image:
         type: "string"
@@ -4972,7 +4976,7 @@ definitions:
   StackCreateRequest:
     type: "object"
     required:
-    - "Name"
+      - "Name"
     properties:
       Name:
         type: "string"
@@ -5172,7 +5176,7 @@ definitions:
   ExtensionCreateRequest:
     type: "object"
     required:
-    - "License"
+      - "License"
     properties:
       License:
         type: "string"

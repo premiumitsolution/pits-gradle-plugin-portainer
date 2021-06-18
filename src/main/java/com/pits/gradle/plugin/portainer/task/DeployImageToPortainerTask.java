@@ -2,7 +2,6 @@ package com.pits.gradle.plugin.portainer.task;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.pits.gradle.plugin.data.docker.dto.ContainerCreateResponse;
 import com.pits.gradle.plugin.data.docker.dto.EndpointIPAMConfig;
 import com.pits.gradle.plugin.data.docker.dto.EndpointSettings;
 import com.pits.gradle.plugin.data.docker.dto.HostConfig;
@@ -17,12 +16,18 @@ import com.pits.gradle.plugin.data.portainer.ApiException;
 import com.pits.gradle.plugin.data.portainer.controller.AuthApi;
 import com.pits.gradle.plugin.data.portainer.controller.ContainerApi;
 import com.pits.gradle.plugin.data.portainer.controller.EndpointsApi;
+import com.pits.gradle.plugin.data.portainer.controller.ResourceControlsApi;
+import com.pits.gradle.plugin.data.portainer.controller.TeamsApi;
 import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserRequest;
 import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
+import com.pits.gradle.plugin.data.portainer.dto.ResourceControlUpdateRequest;
+import com.pits.gradle.plugin.data.portainer.dto.Team;
 import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
+import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
+import com.pits.gradle.plugin.portainer.setting.ContainerAccessSetting;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -40,6 +45,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
@@ -89,6 +96,18 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   @Input
   abstract public Property<Boolean> getRemoveOldImages();
+
+  @Input
+  abstract public Property<String> getRestartPolicy();
+
+  @Input
+  abstract public Property<ContainerAccessSetting> getContainerAccess();
+
+  @Input
+  abstract public MapProperty<String, Object> getVolumes();
+
+  @Input
+  abstract public ListProperty<String> getBindings();
 
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
@@ -149,10 +168,10 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       }
     } catch (ApiException error) {
       log.error("Error: '" + error.getMessage() + "' with response:" + error.getResponseBody(), error);
-      throw new Exception(error.getMessage());
+      throw new Exception(error);
     } catch (Exception error) {
       log.error(error.getMessage(), error);
-      throw new Exception(error.getMessage());
+      throw new Exception(error);
     }
   }
 
@@ -161,7 +180,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     Response<List<Image>> imageListCallResponse = imageListCall.execute();
     if (imageListCallResponse.code() == 200) {
       List<Image> oldImages = imageListCallResponse.body().stream()
-          .filter(image -> image.getRepoTags().stream().filter(imageTagValue -> imageTagValue.contains(getDockerImageName().get())).count() > 0)
+          .filter(image -> image.getRepoTags() != null
+              && image.getRepoTags().stream().filter(imageTagValue -> imageTagValue.contains(getDockerImageName().get())).count() > 0)
           .collect(Collectors.toList());
 
       for (Image imageInfo : oldImages) {
@@ -169,7 +189,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
         Response<Image> imageInfoCallResponse = imageInfoCall.execute();
         if (imageInfoCallResponse.code() == 200) {
           Image imageDetail = imageInfoCallResponse.body();
-          if ((imageDetail.getContainer() != null) && (!imageDetail.getContainer().equals(""))) {
+          if ((imageDetail.getContainer() != null) && (!imageDetail.getContainer().equals("")) && (!imageDetail.getRepoTags().get(0)
+              .contains(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get())))) {
             //Remove container
             log.info("Remove image with id='{}'", imageDetail.getId());
             Call<List<ImageDeleteResponseItem>> removeImageCall = portainerDockerApi.removeImage(endPointId, imageDetail.getId(), apiToken);
@@ -196,11 +217,35 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     log.info("Started new container with id='{}'", containerId);
   }
 
-  private String createNewContainer(String apiToken, Integer endPointId) throws IOException {
+  private String createNewContainer(String apiToken, Integer endPointId) throws IOException, ApiException {
     ContainerCreatePortainerRequest containerConfig = new ContainerCreatePortainerRequest();
     containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
     containerConfig.openStdin(false);
     containerConfig.tty(false);
+    containerConfig.volumes(getVolumes().get());
+
+
+    RestartPolicy restartPolicy;
+    switch (getRestartPolicy().get()) {
+      case "onFailure":
+        restartPolicy = new RestartPolicy().name(NameEnum.ON_FAILURE);
+        break;
+      case "unlessStopped":
+        restartPolicy = new RestartPolicy().name(NameEnum.UNLESS_STOPPED);
+        break;
+      case "always":
+      default:
+        restartPolicy = new RestartPolicy().name(NameEnum.ALWAYS);
+        break;
+    }
+
+    HostConfig hostConfig = new HostConfig()
+        .networkMode("bridge")
+        .restartPolicy(restartPolicy)
+        .publishAllPorts(false)
+        .autoRemove(false)
+        .privileged(false)
+        .init(false);
 
     String ports = getPublishedPorts().getOrNull();
     if (ports != null) {
@@ -208,15 +253,6 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       if (portArray.length > 0) {
         Map<String, Object> exposedPorts = new HashMap<>();
         Map<String, List<PortBinding>> hostPortBindings = new HashMap<>();
-
-        HostConfig hostConfig = new HostConfig()
-            .networkMode("bridge")
-            .restartPolicy(new RestartPolicy().name(NameEnum.EMPTY))
-            .publishAllPorts(false)
-            .autoRemove(false)
-            .privileged(false)
-            .init(false);
-
         Arrays.stream(portArray).map(s -> s.split("/")).forEach(strings -> {
           String protocol = strings[0].trim();
           String containerPort = strings[1].trim();
@@ -230,6 +266,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
           hostPortBindings.put(exposeValue, Collections.singletonList(new PortBinding().hostPort(hostPort)));
         });
         hostConfig.portBindings(hostPortBindings);
+        hostConfig.binds(getBindings().get());
         containerConfig.setExposedPorts(exposedPorts);
         containerConfig.setHostConfig(hostConfig);
 
@@ -241,19 +278,48 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       }
     }
 
-    Call<ContainerCreateResponse> callDeleteContainer = portainerDockerApi.createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
-    Response<ContainerCreateResponse> dockerResponse = callDeleteContainer.execute();
+    Call<ContainerCreatePortainerResponse> callDeleteContainer = portainerDockerApi
+        .createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
+    Response<ContainerCreatePortainerResponse> dockerResponse = callDeleteContainer.execute();
     if ((dockerResponse.code() == 200) || (dockerResponse.code() == 201)) {
-      ContainerCreateResponse createResponse = dockerResponse.body();
+      ContainerCreatePortainerResponse createResponse = dockerResponse.body();
       StringJoiner sb = new StringJoiner("\n");
       if (createResponse.getWarnings() != null) {
         createResponse.getWarnings().forEach(sb::add);
       }
-      log.info("Created new container with id='{}', warnings='{}'", createResponse.getId(), sb);
+      log.info("Created new container with id='{}', resourceId={}, warnings='{}'", createResponse.getId(),
+          createResponse.getPortainer().getResourceControl().getId(), sb);
+
+      //Установка прав доступа к созданному контейнеру
+      setupContainerSecurity(createResponse);
+
       return createResponse.getId();
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());
     }
+  }
+
+  private void setupContainerSecurity(ContainerCreatePortainerResponse createResponse) throws ApiException {
+    Integer resourceControlId = createResponse.getPortainer().getResourceControl().getId();
+    List<Team> portainerTeamList = getPortainerTeamList();
+    Map<String, Integer> teamMap = portainerTeamList.stream().collect(Collectors.toMap(Team::getName, Team::getId));
+    ResourceControlsApi resourceControlsApi = new ResourceControlsApi(apiClient);
+    ContainerAccessSetting containerAccessSetting = getContainerAccess().get();
+    ResourceControlUpdateRequest updateData = new ResourceControlUpdateRequest()
+        ._public(containerAccessSetting.getPublicAccess().get());
+    containerAccessSetting.getTeams().get().forEach(teamCode -> {
+      if (teamMap.containsKey(teamCode)) {
+        updateData.addTeamsItem(teamMap.get(teamCode));
+      } else {
+        log.error("Can't found team by code:'{}'", teamCode);
+      }
+    });
+    resourceControlsApi.resourceControlUpdate(resourceControlId, updateData);
+  }
+
+  private List<Team> getPortainerTeamList() throws ApiException {
+    TeamsApi teamsApi = new TeamsApi(apiClient);
+    return teamsApi.teamList();
   }
 
   private void pullImage(String apiToken, Integer endPointId) throws IOException {
@@ -282,7 +348,6 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   private String authenticate() throws ApiException {
     AuthApi authApi = new AuthApi(apiClient);
-
     AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest()
         .username(getPortainerLogin().get())
         .password(getPortainerPassword().get());
@@ -295,10 +360,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   private Integer determineEndPoint() throws ApiException {
     EndpointsApi endpointsApi = new EndpointsApi(apiClient);
     List<EndpointSubset> endpointList = endpointsApi.endpointList();
-
     Optional<EndpointSubset> endpointSubsetOptional = endpointList.stream()
         .filter(endpointSubset -> endpointSubset.getName() != null && endpointSubset.getName().equals(getPortainerEndPointName().get())).findFirst();
-
     return endpointSubsetOptional.orElseThrow(() -> new ApiException("Can't found endpoint by name:" + getPortainerEndPointName().get())).getId();
   }
 
