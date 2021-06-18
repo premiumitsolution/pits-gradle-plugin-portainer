@@ -9,18 +9,12 @@
 - Добавлена возможность задавать volume 
 - Добавлены параметры volume и bindings
 
-Пример привязки volume:
-Пусть существует некоторый volume с именем "test_volume", мы поднимаем докер контейнер 
-директорию /var/example которого нам необходимо сделать персистентной, для этого необходимо:
+Пример: 
 ```groovy
-def volumesMap = ["/var/example" : {}]
-def bindsList = ["test_volume:/var/example"]
+def volumes = ["test_volume_name" : "/var/example"]
 
 portainerSetting {
-  //----
     volumes = volumesMap
-    bindings = bindsList
-  
 }
 ```
 

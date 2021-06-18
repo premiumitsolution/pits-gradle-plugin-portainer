@@ -28,7 +28,6 @@ public class PortainerPlugin implements Plugin<Project> {
       task.getRemoveOldImages().set(portainerSetting.getRemoveOldImages());
       task.getRestartPolicy().set(portainerSetting.getRestartPolicy());
       task.getContainerAccess().set(portainerSetting.getContainerAccess());
-      task.getBindings().set(portainerSetting.getBindings());
       task.getVolumes().set(portainerSetting.getVolumes());
     });
   }

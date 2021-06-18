@@ -47,8 +47,6 @@ public abstract class PortainerSetting {
 
   abstract public Property<String> getRestartPolicy();
 
-  abstract public MapProperty<String, Object> getVolumes();
-
-  abstract public ListProperty<String> getBindings();
+  abstract public MapProperty<String, String> getVolumes();
 
 }
