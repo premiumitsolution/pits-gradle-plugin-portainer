@@ -4,6 +4,19 @@
 
 ## Version History
 
+### 1.0.9
+
+- Добавлена возможность задавать volume 
+
+Пример: 
+```groovy
+def volumes = ["test_volume_name" : "/var/example"]
+
+portainerSetting {
+    volumes = volumesMap
+}
+```
+
 ### 1.0.8
 
 - Добавлена возможность задавать права доступа для создаваемого контейнера

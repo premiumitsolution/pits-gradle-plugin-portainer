@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -104,10 +106,8 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   abstract public Property<ContainerAccessSetting> getContainerAccess();
 
   @Input
-  abstract public MapProperty<String, Object> getVolumes();
+  abstract public MapProperty<String, String> getVolumes();
 
-  @Input
-  abstract public ListProperty<String> getBindings();
 
   private void initDockerApi() {
     log.info("Initialize initDockerApi");
@@ -222,8 +222,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     containerConfig.image(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()));
     containerConfig.openStdin(false);
     containerConfig.tty(false);
-    containerConfig.volumes(getVolumes().get());
-
+    containerConfig.volumes(createMapOfVolumes());
 
     RestartPolicy restartPolicy;
     switch (getRestartPolicy().get()) {
@@ -266,7 +265,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
           hostPortBindings.put(exposeValue, Collections.singletonList(new PortBinding().hostPort(hostPort)));
         });
         hostConfig.portBindings(hostPortBindings);
-        hostConfig.binds(getBindings().get());
+        setupVolumeBinds(hostConfig);
         containerConfig.setExposedPorts(exposedPorts);
         containerConfig.setHostConfig(hostConfig);
 
@@ -296,6 +295,47 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       return createResponse.getId();
     } else {
       throw new RuntimeException("Error while create container:" + dockerResponse.message());
+    }
+  }
+
+  /**
+   * Берем заданные пользователем volumes, берем из них директорию и создаем map
+   * где ключ - директория контейнера, а значение - null (так надо)
+   * @return
+   */
+  @NotNull
+  private Map<String, Object> createMapOfVolumes() {
+    Map<String, String> volumesMap = getVolumes().get();
+    Collection<String> volumeDirs = volumesMap.values();
+    Map<String, Object> resultVolumesMap = new HashMap<>();
+    for (String volumeDir : volumeDirs) {
+      resultVolumesMap.put(volumeDir, null);
+    }
+    return resultVolumesMap;
+  }
+
+  /**
+   * Устанавливает заданные volumes в binds указанного host config-а
+   * @param hostConfig конфиг, в который необходимо установить значение
+   */
+  private void setupVolumeBinds(HostConfig hostConfig) {
+    final Map<String, String> volumesMap = getVolumes().get();
+
+    if (volumesMap.isEmpty()) {
+      return;
+    }
+
+    List<String> volumesList = volumesMap
+            .entrySet()
+            .stream()
+            .map(entry -> String.format("%s:%s", entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
+    final List<String> binds = hostConfig.getBinds();
+
+    if (binds == null) {
+      hostConfig.binds(volumesList);
+    } else {
+      binds.addAll(volumesList);
     }
   }
 
