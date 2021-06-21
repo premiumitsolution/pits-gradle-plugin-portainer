@@ -339,10 +339,6 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     }
   }
 
-  private void volumeConfigure(HostConfig hostConfig, ContainerCreatePortainerRequest containerCreatePortainerRequest) {
-
-  }
-
   private void setupContainerSecurity(ContainerCreatePortainerResponse createResponse) throws ApiException {
     Integer resourceControlId = createResponse.getPortainer().getResourceControl().getId();
     List<Team> portainerTeamList = getPortainerTeamList();
