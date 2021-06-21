@@ -1,13 +1,28 @@
 # Premium IT Solution Portainer.io gradle plugin
 
-[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.8-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
+[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.9-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
 
 ## Version History
 
+### 1.0.9
+
+- Добавлена возможность задавать volume 
+
+Пример: 
+```groovy
+def volumes = ["test_volume_name" : "/var/example"]
+
+portainerSetting {
+    volumes = volumesMap
+}
+```
+
 ### 1.0.8
+
 - Добавлена возможность задавать права доступа для создаваемого контейнера
 
 ### 1.0.7
+
 - Исправлен вылет при пустом RepoTag
 - Добавлена возможность задавать restartPolicy - 'always', 'onFailure', 'unlessStopped'
 
@@ -39,6 +54,7 @@ portainerSetting {
     }
 }
 ```
+
 sportainerApiUrl - URL for portainer api, for example: https://repo.yourdomain.ru/api
 
 publishedPorts - port for publish in format: type/containerPort/hostPort;type/containerPort/hostPort. For example: tcp/8080/80, tcp/8081/8888
@@ -95,3 +111,4 @@ Tested with portainer.io version:
 
 - 2.0.0
 - 2.1.1
+- 2.5.1
