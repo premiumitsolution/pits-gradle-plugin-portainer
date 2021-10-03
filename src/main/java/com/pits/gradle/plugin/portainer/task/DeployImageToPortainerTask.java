@@ -22,9 +22,10 @@ import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserRequest;
 import com.pits.gradle.plugin.data.portainer.dto.AuthenticateUserResponse;
 import com.pits.gradle.plugin.data.portainer.dto.ContainerSummary;
 import com.pits.gradle.plugin.data.portainer.dto.EndpointSubset;
+import com.pits.gradle.plugin.data.portainer.dto.RegistrySubset;
 import com.pits.gradle.plugin.data.portainer.dto.ResourceControlUpdateRequest;
 import com.pits.gradle.plugin.data.portainer.dto.Team;
-import com.pits.gradle.plugin.portainer.api.PortainerDockerApi;
+import com.pits.gradle.plugin.portainer.api.PortainerExtendedApi;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
 import com.pits.gradle.plugin.portainer.setting.ContainerAccessSetting;
@@ -46,7 +47,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -67,7 +67,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public abstract class DeployImageToPortainerTask extends DefaultTask {
 
   private ApiClient apiClient;
-  private PortainerDockerApi portainerDockerApi;
+  private PortainerExtendedApi portainerExtendedApi;
 
   @Input
   abstract public Property<String> getPortainerApiUrl();
@@ -130,7 +130,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
         .addConverterFactory(GsonConverterFactory.create(gson))
         .client(okHttpClient)
         .build();
-    portainerDockerApi = retrofit.create(PortainerDockerApi.class);
+    portainerExtendedApi = retrofit.create(PortainerExtendedApi.class);
   }
 
   @TaskAction
@@ -176,7 +176,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   }
 
   private void removeOldImages(String apiToken, Integer endPointId) throws IOException {
-    Call<List<Image>> imageListCall = portainerDockerApi.getImageList(endPointId, false, apiToken);
+    Call<List<Image>> imageListCall = portainerExtendedApi.getImageList(endPointId, false, apiToken);
     Response<List<Image>> imageListCallResponse = imageListCall.execute();
     if (imageListCallResponse.code() == 200) {
       List<Image> oldImages = imageListCallResponse.body().stream()
@@ -185,7 +185,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
           .collect(Collectors.toList());
 
       for (Image imageInfo : oldImages) {
-        Call<Image> imageInfoCall = portainerDockerApi.getImageInfo(endPointId, imageInfo.getId(), apiToken);
+        Call<Image> imageInfoCall = portainerExtendedApi.getImageInfo(endPointId, imageInfo.getId(), apiToken);
         Response<Image> imageInfoCallResponse = imageInfoCall.execute();
         if (imageInfoCallResponse.code() == 200) {
           Image imageDetail = imageInfoCallResponse.body();
@@ -193,7 +193,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
               .contains(String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get())))) {
             //Remove container
             log.info("Remove image with id='{}'", imageDetail.getId());
-            Call<List<ImageDeleteResponseItem>> removeImageCall = portainerDockerApi.removeImage(endPointId, imageDetail.getId(), apiToken);
+            Call<List<ImageDeleteResponseItem>> removeImageCall = portainerExtendedApi.removeImage(endPointId, imageDetail.getId(), apiToken);
             Response<List<ImageDeleteResponseItem>> removeImageCallResponse = removeImageCall.execute();
             if (removeImageCallResponse.code() != 200) {
               throw new RuntimeException("Error remove image:" + removeImageCallResponse.message());
@@ -209,7 +209,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
   }
 
   private void startContainer(String apiToken, Integer endPointId, String containerId) throws IOException {
-    Call<Void> callCreate = portainerDockerApi.startContainer(endPointId, containerId, apiToken);
+    Call<Void> callCreate = portainerExtendedApi.startContainer(endPointId, containerId, apiToken);
     Response<Void> responseCreate = callCreate.execute();
     if (responseCreate.code() != 204) {
       throw new RuntimeException("Error while start container:" + responseCreate.message());
@@ -277,7 +277,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
       }
     }
 
-    Call<ContainerCreatePortainerResponse> callDeleteContainer = portainerDockerApi
+    Call<ContainerCreatePortainerResponse> callDeleteContainer = portainerExtendedApi
         .createContainer(endPointId, containerConfig, getContainerName().get(), apiToken);
     Response<ContainerCreatePortainerResponse> dockerResponse = callDeleteContainer.execute();
     if ((dockerResponse.code() == 200) || (dockerResponse.code() == 201)) {
@@ -362,16 +362,29 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     return teamsApi.teamList();
   }
 
-  private void pullImage(String apiToken, Integer endPointId) throws IOException {
-    String registryAuth = String.format("{\n"
-        + "  \"serveraddress\": \"%s\""
-        + "}", getRegistryUrl().get());
-    registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
-    Response<Void> createImageResponse = portainerDockerApi
-        .createImage(endPointId, String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()), registryAuth, apiToken)
-        .execute();
-    if (createImageResponse.code() != 200) {
-      throw new RuntimeException("Error while pull container:" + createImageResponse.message());
+  private void pullImage(String apiToken, Integer endPointId) throws ApiException, IOException {
+    Call<List<RegistrySubset>> registryCall = portainerExtendedApi.getEndpointRegistries(endPointId, apiToken);
+    Response<List<RegistrySubset>> registryCallResponse = registryCall.execute();
+    if (registryCallResponse.code() == 200) {
+      Optional<RegistrySubset> registryOptional = registryCallResponse.body().stream().peek(registrySubset -> {
+        log.info("Founded registry: {}", registrySubset.getURL());
+      }).filter(registrySubset -> registrySubset.getURL().equals(getRegistryUrl().get())).findFirst();
+      if (registryOptional.isPresent()) {
+        String registryAuth = String.format("{\n"
+            + "  \"registryId\": %s"
+            + "}", registryOptional.get().getId());
+        registryAuth = Base64.getEncoder().encodeToString(registryAuth.getBytes(StandardCharsets.UTF_8));
+        Response<Void> createImageResponse = portainerExtendedApi
+            .createImage(endPointId, String.format("%s:%s", getDockerImageName().get(), getDockerImageTag().get()), registryAuth, apiToken)
+            .execute();
+        if (createImageResponse.code() != 200) {
+          throw new RuntimeException("Error while pull container:" + createImageResponse.message());
+        }
+      } else {
+        throw new RuntimeException("Can't found registry by URL:" + getRegistryUrl().get());
+      }
+    } else {
+      throw new RuntimeException(String.format("Can't get registry list for endpoint '%s' : %s", endPointId, registryCallResponse.message()));
     }
   }
 
@@ -412,7 +425,7 @@ public abstract class DeployImageToPortainerTask extends DefaultTask {
     if ((foundedContainers != null) && (foundedContainers.size() > 0)) {
       for (ContainerSummary containerSummary : foundedContainers) {
         log.info("Remove container with id='{}', name='{}' and image='{}'", containerSummary.getId(), containerSummary.getNames(), containerSummary.getImage());
-        Call<Void> callDeleteContainer = portainerDockerApi.removeContainer(endpointId, containerSummary.getId(), true, true, false, apiToken);
+        Call<Void> callDeleteContainer = portainerExtendedApi.removeContainer(endpointId, containerSummary.getId(), true, true, false, apiToken);
         Response<Void> dockerResponse = callDeleteContainer.execute();
         if (dockerResponse.code() != 204) {
           throw new RuntimeException(String.format("Error while delete container '%s': %s", containerSummary.getId(), dockerResponse.message()));

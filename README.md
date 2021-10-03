@@ -1,19 +1,24 @@
 # Premium IT Solution Portainer.io gradle plugin
 
-[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.8-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
+[![Gradle Plugin Portal](https://img.shields.io/badge/Plugin_Portal-v1.0.10-green.svg)](https://plugins.gradle.org/plugin/com.pits.gradle.plugin.portainer)
 
 ## Version History
 
+### 1.0.10
+
+- Добавлена поддержка Portainer.io Версии 2.9
+
 ### 1.0.9
 
-- Добавлена возможность задавать volume 
+- Добавлена возможность задавать volume
 
-Пример: 
+Пример:
+
 ```groovy
-def volumes = ["test_volume_name" : "/var/example"]
+def volumes = ["test_volume_name": "/var/example"]
 
 portainerSetting {
-    volumes = volumesMap
+  volumes = volumesMap
 }
 ```
 
@@ -111,3 +116,5 @@ Tested with portainer.io version:
 
 - 2.0.0
 - 2.1.1
+- 2.6.0
+- 2.9.0

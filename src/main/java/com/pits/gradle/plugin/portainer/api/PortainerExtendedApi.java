@@ -2,6 +2,7 @@ package com.pits.gradle.plugin.portainer.api;
 
 import com.pits.gradle.plugin.data.docker.dto.Image;
 import com.pits.gradle.plugin.data.docker.dto.ImageDeleteResponseItem;
+import com.pits.gradle.plugin.data.portainer.dto.RegistrySubset;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerRequest;
 import com.pits.gradle.plugin.portainer.data.dto.docker.ContainerCreatePortainerResponse;
 import java.util.List;
@@ -21,7 +22,18 @@ import retrofit2.http.Query;
  * @version 1.0
  * @since 1.0.0
  */
-public interface PortainerDockerApi {
+public interface PortainerExtendedApi {
+
+  /**
+   * Get portainer registry list for endpoint.
+   *
+   * @param endPointId endpoint id
+   * @param authHeader auth header
+   * @return DockerResponse if error is present
+   * @see <a href="https://docs.docker.com/engine/api/v1.30/#operation/ContainerDelete">Docker ContainerDelete</a>
+   */
+  @GET("endpoints/{endpointId}/registries")
+  Call<List<RegistrySubset>> getEndpointRegistries(@Path("endpointId") Integer endPointId, @Header("Authorization") String authHeader);
 
   /**
    * Delete container by id.
